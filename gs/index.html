@@ -1,39 +1,354 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Getaway Shootout - Poki</title>
-	<script>
-	window.config = {
-		loader: 'unity-2020',
-		debug: false,
-		maxRatio: 24 / 9,
-		minRatio: 9 / 24,
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Getaway Shootout - Poki</title>
 
-		title: 'Getaway Shootout',
-		thumbnail: 'https:\/\/img.poki-cdn.com\/7e6806e76a4f8ad5b7a8ab8d1d42a74b.png',
-		numScreenshots:  4 ,
+    <!-- Orbitron for intro title -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
-		unityVersion: '2022.3.14f1',
-		unityWebglBuildUrl: '',
+    <script>
+    window.config = {
+        loader: 'unity-2020',
+        debug: false,
+        maxRatio: 24 / 9,
+        minRatio: 9 / 24,
 
-		fileSize:  22 ,
-		cachedDecompressedFileSizes: {
-			'078579ebdbd7e90539ba3ce278785287.wasm':  16957890 ,
-			'323862927f75a9b36201c486bc3975d5.data':  5236721 ,
-			'GS_Poki_v1.2.3.loader.js':  13106 ,
-			'd87e5c1d03a9ad33870e7f18e60cc207.js':  355495 ,
-		},
-		"metadata": {"poki_template_version":1,"background_color":"#231F20","code_filename":"078579ebdbd7e90539ba3ce278785287.wasm","company_name":"New Eich Games","data_filename":"323862927f75a9b36201c486bc3975d5.data","development_player":"false","framework_filename":"d87e5c1d03a9ad33870e7f18e60cc207.js","height":"600","loader_filename":"GS_Poki_v1.2.3.loader.js","product_name":"Getaway Shootout","product_version":"1.2.3","splash_screen_style":"Dark","unity_version":"2022.3.14f1","use_data_caching":"false","use_threads":"false","use_wasm":"true","use_webgl_1_0":"false","use_webgl_2_0":"true","width":"960"}
-	};
-	</script>
-<!-- will be copied to the resulting head //-->
+        title: 'Getaway Shootout',
+        thumbnail: 'https:\/\/img.poki-cdn.com\/7e6806e76a4f8ad5b7a8ab8d1d42a74b.png',
+        numScreenshots:  4 ,
+
+        unityVersion: '2022.3.14f1',
+        unityWebglBuildUrl: '',
+
+        fileSize:  22 ,
+        cachedDecompressedFileSizes: {
+            '078579ebdbd7e90539ba3ce278785287.wasm':  16957890 ,
+            '323862927f75a9b36201c486bc3975d5.data':  5236721 ,
+            'GS_Poki_v1.2.3.loader.js':  13106 ,
+            'd87e5c1d03a9ad33870e7f18e60cc207.js':  355495 ,
+        },
+        "metadata": {
+            "poki_template_version":1,
+            "background_color":"#231F20",
+            "code_filename":"078579ebdbd7e90539ba3ce278785287.wasm",
+            "company_name":"New Eich Games",
+            "data_filename":"323862927f75a9b36201c486bc3975d5.data",
+            "development_player":"false",
+            "framework_filename":"d87e5c1d03a9ad33870e7f18e60cc207.js",
+            "height":"600",
+            "loader_filename":"GS_Poki_v1.2.3.loader.js",
+            "product_name":"Getaway Shootout",
+            "product_version":"1.2.3",
+            "splash_screen_style":"Dark",
+            "unity_version":"2022.3.14f1",
+            "use_data_caching":"false",
+            "use_threads":"false",
+            "use_wasm":"true",
+            "use_webgl_1_0":"false",
+            "use_webgl_2_0":"true",
+            "width":"960"
+        }
+    };
+    </script>
+
+    <!-- ✨ Intro styles -->
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #231F20; /* match metadata background */
+        }
+
+        #intro-screen {
+            position: fixed;
+            inset: 0;
+            background-color: #414141;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
+        }
+
+        #intro-screen.hidden-intro {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #intro-logo-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        #intro-title {
+            font-family: "Orbitron", system-ui, -apple-system, BlinkMacSystemFont,
+                sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #d3a410, #b7870f, #ffe4a1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(211, 165, 16, 0.4));
+            opacity: 0;
+            animation: titleFade 1s ease forwards 0.4s;
+            text-align: center;
+        }
+
+        @keyframes titleFade {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%,
+            100% {
+                translate: 0px 36px;
+            }
+            50% {
+                translate: 0px 46px;
+            }
+        }
+
+        @keyframes bounce2 {
+            0%,
+            100% {
+                translate: 0px 46px;
+            }
+            50% {
+                translate: 0px 56px;
+            }
+        }
+
+        @keyframes umbral {
+            0% {
+                stop-color: #d3a5102e;
+            }
+            50% {
+                stop-color: rgba(211, 165, 16, 0.519);
+            }
+            100% {
+                stop-color: #d3a5102e;
+            }
+        }
+
+        @keyframes particles {
+            0%,
+            100% {
+                translate: 0px 16px;
+            }
+            50% {
+                translate: 0px 6px;
+            }
+        }
+
+        #particles {
+            animation: particles 4s ease-in-out infinite;
+        }
+
+        #animatedStop {
+            animation: umbral 4s infinite;
+        }
+
+        #bounce {
+            animation: bounce 4s ease-in-out infinite;
+            translate: 0px 36px;
+        }
+
+        #bounce2 {
+            animation: bounce2 4s ease-in-out infinite;
+            translate: 0px 46px;
+            animation-delay: 0.5s;
+        }
+    </style>
 </head>
 <body>
-	<script src="https://game-cdn.poki.com/loaders/v3/master-loader.js"></script>
-<!-- will be copied to the resulting body //-->
-<!-- will also be copied to the resulting body //-->
+    <!-- ✨ Intro overlay -->
+    <div id="intro-screen">
+        <div id="intro-logo-wrapper">
+            <div id="intro-title">Tinkle Games</div>
+
+            <svg xmlns="http://www.w3.org/2000/svg" height="200" width="200">
+                <g style="order: -1;">
+                    <polygon
+                        transform="rotate(45 100 100)"
+                        stroke-width="1"
+                        stroke="#d3a410"
+                        fill="none"
+                        points="70,70 148,50 130,130 50,150"
+                        id="bounce"
+                    ></polygon>
+                    <polygon
+                        transform="rotate(45 100 100)"
+                        stroke-width="1"
+                        stroke="#d3a410"
+                        fill="none"
+                        points="70,70 148,50 130,130 50,150"
+                        id="bounce2"
+                    ></polygon>
+                    <polygon
+                        transform="rotate(45 100 100)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#414750"
+                        points="70,70 150,50 130,130 50,150"
+                    ></polygon>
+                    <polygon
+                        stroke-width="2"
+                        stroke=""
+                        fill="url(#gradiente)"
+                        points="100,70 150,100 100,130 50,100"
+                    ></polygon>
+                    <defs>
+                        <linearGradient
+                            y2="100%"
+                            x2="10%"
+                            y1="0%"
+                            x1="0%"
+                            id="gradiente"
+                        >
+                            <stop
+                                style="stop-color: #1e2026;stop-opacity:1"
+                                offset="20%"
+                            ></stop>
+                            <stop
+                                style="stop-color:#414750;stop-opacity:1"
+                                offset="60%"
+                            ></stop>
+                        </linearGradient>
+                    </defs>
+                    <polygon
+                        transform="translate(20, 31)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#b7870f"
+                        points="80,50 80,75 80,99 40,75"
+                    ></polygon>
+                    <polygon
+                        transform="translate(20, 31)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="url(#gradiente2)"
+                        points="40,-40 80,-40 80,99 40,75"
+                    ></polygon>
+                    <defs>
+                        <linearGradient
+                            y2="100%"
+                            x2="0%"
+                            y1="-17%"
+                            x1="10%"
+                            id="gradiente2"
+                        >
+                            <stop
+                                style="stop-color: #d3a51000;stop-opacity:1"
+                                offset="20%"
+                            ></stop>
+                            <stop
+                                style="stop-color:#d3a51054;stop-opacity:1"
+                                offset="100%"
+                                id="animatedStop"
+                            ></stop>
+                        </linearGradient>
+                    </defs>
+                    <polygon
+                        transform="rotate(180 100 100) translate(20, 20)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#d3a410"
+                        points="80,50 80,75 80,99 40,75"
+                    ></polygon>
+                    <polygon
+                        transform="rotate(0 100 100) translate(60, 20)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="url(#gradiente3)"
+                        points="40,-40 80,-40 80,85 40,110.2"
+                    ></polygon>
+                    <defs>
+                        <linearGradient
+                            y2="100%"
+                            x2="10%"
+                            y1="0%"
+                            x1="0%"
+                            id="gradiente3"
+                        >
+                            <stop
+                                style="stop-color: #d3a51000;stop-opacity:1"
+                                offset="20%"
+                            ></stop>
+                            <stop
+                                style="stop-color:#d3a51054;stop-opacity:1"
+                                offset="100%"
+                            ></stop>
+                        </linearGradient>
+                    </defs>
+                    <polygon
+                        transform="rotate(45 100 100) translate(80, 95)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#ffe4a1"
+                        points="5,0 5,5 0,5 0,0"
+                        id="particles"
+                    ></polygon>
+                    <polygon
+                        transform="rotate(45 100 100) translate(80, 55)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#ccb069"
+                        points="6,0 6,6 0,6 0,0"
+                        id="particles"
+                    ></polygon>
+                    <polygon
+                        transform="rotate(45 100 100) translate(70, 80)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#fff"
+                        points="2,0 2,2 0,2 0,0"
+                        id="particles"
+                    ></polygon>
+                    <polygon
+                        stroke-width="2"
+                        stroke=""
+                        fill="#292d34"
+                        points="29.5,99.8 100,142 100,172 29.5,130"
+                    ></polygon>
+                    <polygon
+                        transform="translate(50, 92)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#1f2127"
+                        points="50,50 120.5,8 120.5,35 50,80"
+                    ></polygon>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Poki loader -->
+    <script src="https://game-cdn.poki.com/loaders/v3/master-loader.js"></script>
+
+    <!-- ✨ Intro hide script -->
+    <script>
+        window.addEventListener("load", () => {
+            const intro = document.getElementById("intro-screen");
+            if (!intro) return;
+            setTimeout(() => {
+                intro.classList.add("hidden-intro");
+                setTimeout(() => intro.remove(), 800);
+            }, 2500);
+        });
+    </script>
 </body>
 </html>
