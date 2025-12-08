@@ -1,249 +1,608 @@
-<!doctypehtml>
-    <html lang=en-us>
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content="com.1button.ricochet" name="app_bundle_id">
+    <meta content="2" name="app_bundle_version">
+    <meta content="5.53" name="app_version">
+    <title>Mr Bullet</title>
 
-    <head>
-        <meta charset=utf-8>
-        <meta content="text/html; charset=utf-8" http-equiv=Content-Type>
-        <meta content=com.1button.ricochet name=app_bundle_id>
-        <meta content=2 name=app_bundle_version>
-        <meta content=5.53 name=app_version>
-        <title>Mr Bullet</title>
-        <style>
-            div.emscripten_border {
-                max-height: 370px;
-                text-align: center;
-                display: block;
-                position: relative;
-                top: 50%;
-                transform: translateY(-50%)
+    <!-- Orbitron for intro title -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        div.emscripten_border {
+            max-height: 370px;
+            text-align: center;
+            display: block;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        canvas.emscripten {
+            border: 0 none;
+        }
+
+        #progress::-moz-progress-bar {
+            background-color: #0075ff;
+        }
+
+        #progress::-webkit-progress-bar {
+            background-color: gray;
+        }
+
+        #progress::-webkit-progress-value {
+            background-color: #0075ff !important;
+        }
+
+        #progress {
+            color: #0075ff;
+            background-color: gray;
+        }
+
+        #icon img {
+            max-width: 150px;
+            border-radius: 25%;
+        }
+
+        #name {
+            padding-top: 20px;
+            padding-bottom: 20px;
+            font-size: 40px;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            border: 0;
+            background-color: #48c9ff;
+            font-family: Helvetica, sans-serif-medium;
+            font-size: 25px;
+            color: #0075ff;
+            text-align: center;
+        }
+
+        @-webkit-keyframes rotation {
+            from {
+                -webkit-transform: rotate(0);
             }
 
-            canvas.emscripten {
-                border: 0 none
+            to {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @-moz-keyframes rotation {
+            from {
+                -moz-transform: rotate(0);
             }
 
-            #progress::-moz-progress-bar {
-                background-color: #0075ff
+            to {
+                -moz-transform: rotate(360deg);
+            }
+        }
+
+        @-o-keyframes rotation {
+            from {
+                -o-transform: rotate(0);
             }
 
-            #progress::-webkit-progress-bar {
-                background-color: gray
+            to {
+                -o-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes rotation {
+            from {
+                transform: rotate(0);
             }
 
-            #progress::-webkit-progress-value {
-                background-color: #0075ff !important
+            to {
+                transform: rotate(360deg);
             }
+        }
 
-            #progress {
-                color: #0075ff;
-                background-color: gray
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            padding: 0;
+            margin: 0;
+            border: 0;
+        }
+
+        /* ✨ Intro styles (copied/adapted from Horror Tale file) */
+        #intro-screen {
+            position: fixed;
+            inset: 0;
+            background-color: #414141;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
+        }
+
+        #intro-screen.hidden-intro {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #intro-logo-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        #intro-title {
+            font-family: "Orbitron", system-ui, -apple-system, BlinkMacSystemFont,
+                sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #d3a410, #b7870f, #ffe4a1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(211, 165, 16, 0.4));
+            opacity: 0;
+            animation: titleFade 1s ease forwards 0.4s;
+            text-align: center;
+        }
+
+        @keyframes titleFade {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
             }
-
-            #icon img {
-                max-width: 150px;
-                border-radius: 25%
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
+        }
 
-            #name {
-                padding-top: 20px;
-                padding-bottom: 20px;
-                font-size: 40px
+        @keyframes bounce {
+            0%,
+            100% {
+                translate: 0px 36px;
             }
-
-            body,
-            html {
-                width: 100%;
-                height: 100%;
-                padding: 0;
-                margin: 0;
-                border: 0;
-                background-color: #48c9ff;
-                font-family: Helvetica, sans-serif-medium;
-                font-size: 25px;
-                color: #0075ff;
-                text-align: center
+            50% {
+                translate: 0px 46px;
             }
+        }
 
-            @-webkit-keyframes rotation {
-                from {
-                    -webkit-transform: rotate(0)
-                }
-
-                to {
-                    -webkit-transform: rotate(360deg)
-                }
+        @keyframes bounce2 {
+            0%,
+            100% {
+                translate: 0px 46px;
             }
-
-            @-moz-keyframes rotation {
-                from {
-                    -moz-transform: rotate(0)
-                }
-
-                to {
-                    -moz-transform: rotate(360deg)
-                }
+            50% {
+                translate: 0px 56px;
             }
+        }
 
-            @-o-keyframes rotation {
-                from {
-                    -o-transform: rotate(0)
-                }
-
-                to {
-                    -o-transform: rotate(360deg)
-                }
+        @keyframes umbral {
+            0% {
+                stop-color: #d3a5102e;
             }
-
-            @keyframes rotation {
-                from {
-                    transform: rotate(0)
-                }
-
-                to {
-                    transform: rotate(360deg)
-                }
+            50% {
+                stop-color: rgba(211, 165, 16, 0.519);
             }
-
-            * {
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-                padding: 0;
-                margin: 0;
-                border: 0
+            100% {
+                stop-color: #d3a5102e;
             }
-        </style>
-        <script src=https://game-cdn.poki.com/scripts/v2/poki-sdk.js></script>
-        <script src=howler.core.min.js></script>
-        <script src=browser_detector.js></script>
-    </head>
+        }
 
-    <body>
-        <div class=emscripten_border id=initialization>
-            <div class=emscripten id=icon><img src=icon.png></div>
-            <div class=emscripten id=name>Mr Bullet</div>
-            <div class=emscripten id=status>Initialization...</div>
-            <div class=emscripten><progress hidden id=progress max=100 value=0></progress></div>
+        @keyframes particles {
+            0%,
+            100% {
+                translate: 0px 16px;
+            }
+            50% {
+                translate: 0px 6px;
+            }
+        }
+
+        #particles {
+            animation: particles 4s ease-in-out infinite;
+        }
+
+        #animatedStop {
+            animation: umbral 4s infinite;
+        }
+
+        #bounce {
+            animation: bounce 4s ease-in-out infinite;
+            translate: 0px 36px;
+        }
+
+        #bounce2 {
+            animation: bounce2 4s ease-in-out infinite;
+            translate: 0px 46px;
+            animation-delay: 0.5s;
+        }
+    </style>
+
+    <script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>
+    <script src="howler.core.min.js"></script>
+    <script src="browser_detector.js"></script>
+</head>
+
+<body>
+    <!-- ✨ Intro overlay -->
+    <div id="intro-screen">
+        <div id="intro-logo-wrapper">
+            <div id="intro-title">Tinkle Games</div>
+
+            <svg xmlns="http://www.w3.org/2000/svg" height="200" width="200">
+                <g style="order: -1;">
+                    <polygon
+                        transform="rotate(45 100 100)"
+                        stroke-width="1"
+                        stroke="#d3a410"
+                        fill="none"
+                        points="70,70 148,50 130,130 50,150"
+                        id="bounce"
+                    ></polygon>
+                    <polygon
+                        transform="rotate(45 100 100)"
+                        stroke-width="1"
+                        stroke="#d3a410"
+                        fill="none"
+                        points="70,70 148,50 130,130 50,150"
+                        id="bounce2"
+                    ></polygon>
+                    <polygon
+                        transform="rotate(45 100 100)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#414750"
+                        points="70,70 150,50 130,130 50,150"
+                    ></polygon>
+                    <polygon
+                        stroke-width="2"
+                        stroke=""
+                        fill="url(#gradiente)"
+                        points="100,70 150,100 100,130 50,100"
+                    ></polygon>
+                    <defs>
+                        <linearGradient
+                            y2="100%"
+                            x2="10%"
+                            y1="0%"
+                            x1="0%"
+                            id="gradiente"
+                        >
+                            <stop
+                                style="stop-color: #1e2026;stop-opacity:1"
+                                offset="20%"
+                            ></stop>
+                            <stop
+                                style="stop-color:#414750;stop-opacity:1"
+                                offset="60%"
+                            ></stop>
+                        </linearGradient>
+                    </defs>
+                    <polygon
+                        transform="translate(20, 31)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#b7870f"
+                        points="80,50 80,75 80,99 40,75"
+                    ></polygon>
+                    <polygon
+                        transform="translate(20, 31)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="url(#gradiente2)"
+                        points="40,-40 80,-40 80,99 40,75"
+                    ></polygon>
+                    <defs>
+                        <linearGradient
+                            y2="100%"
+                            x2="0%"
+                            y1="-17%"
+                            x1="10%"
+                            id="gradiente2"
+                        >
+                            <stop
+                                style="stop-color: #d3a51000;stop-opacity:1"
+                                offset="20%"
+                            ></stop>
+                            <stop
+                                style="stop-color:#d3a51054;stop-opacity:1"
+                                offset="100%"
+                                id="animatedStop"
+                            ></stop>
+                        </linearGradient>
+                    </defs>
+                    <polygon
+                        transform="rotate(180 100 100) translate(20, 20)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#d3a410"
+                        points="80,50 80,75 80,99 40,75"
+                    ></polygon>
+                    <polygon
+                        transform="rotate(0 100 100) translate(60, 20)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="url(#gradiente3)"
+                        points="40,-40 80,-40 80,85 40,110.2"
+                    ></polygon>
+                    <defs>
+                        <linearGradient
+                            y2="100%"
+                            x2="10%"
+                            y1="0%"
+                            x1="0%"
+                            id="gradiente3"
+                        >
+                            <stop
+                                style="stop-color: #d3a51000;stop-opacity:1"
+                                offset="20%"
+                            ></stop>
+                            <stop
+                                style="stop-color:#d3a51054;stop-opacity:1"
+                                offset="100%"
+                            ></stop>
+                        </linearGradient>
+                    </defs>
+                    <polygon
+                        transform="rotate(45 100 100) translate(80, 95)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#ffe4a1"
+                        points="5,0 5,5 0,5 0,0"
+                        id="particles"
+                    ></polygon>
+                    <polygon
+                        transform="rotate(45 100 100) translate(80, 55)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#ccb069"
+                        points="6,0 6,6 0,6 0,0"
+                        id="particles"
+                    ></polygon>
+                    <polygon
+                        transform="rotate(45 100 100) translate(70, 80)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#fff"
+                        points="2,0 2,2 0,2 0,0"
+                        id="particles"
+                    ></polygon>
+                    <polygon
+                        stroke-width="2"
+                        stroke=""
+                        fill="#292d34"
+                        points="29.5,99.8 100,142 100,172 29.5,130"
+                    ></polygon>
+                    <polygon
+                        transform="translate(50, 92)"
+                        stroke-width="2"
+                        stroke=""
+                        fill="#1f2127"
+                        points="50,50 120.5,8 120.5,35 50,80"
+                    ></polygon>
+                </g>
+            </svg>
         </div>
-        <div id=game-container style=display:none><canvas class=emscripten id=canvas style=display:block></canvas></div>
-        <script>
-            for (var statusElement = document.getElementById("status"), progressElement = document.getElementById("progress"), hierarchyElement = document.getElementById("hierarchy"), nodeProperties = [], i = 0; i < 20; i++) nodeProperties[i] = document.getElementById("nodeProperty" + i);
-            var Module = {
-                preInit: [],
-                preRun: [],
-                postRun: [],
-                print: function(e) {
-                    arguments.length > 1 && (e = Array.prototype.slice.call(arguments).join(" ")), console.log(e)
-                },
-                printErr: function(e) {
-                    arguments.length > 1 && (e = Array.prototype.slice.call(arguments).join(" ")), console.error(e)
-                },
-                canvas: function() {
-                    var e = document.getElementById("canvas");
-                    if (e) return e.addEventListener("webglcontextlost", (function(e) {
-                        Module.ccall && Module.ccall("axmol_webglcontextlost"), alert("WebGL context lost. You will need to reload the page."), e.preventDefault()
-                    }), !1), document.addEventListener("visibilitychange", (() => {
-                        Module.ccall && Module.ccall("axmol_hdoc_visibilitychange", null, ["number"], [document.hidden ? 1 : 0])
-                    })), e
-                }(),
-                setStatus: function(e) {
-                    if (Module.setStatus.last || (Module.setStatus.last = {
-                            time: Date.now(),
-                            text: ""
-                        }), e !== Module.setStatus.last.text) {
-                        var t = e.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/),
-                            n = Date.now();
-                        t && n - Module.setStatus.last.time < 30 || (Module.setStatus.last.time = n, Module.setStatus.last.text = e, t ? (e = t[1], progressElement.value = 100 * parseInt(t[2]), progressElement.max = 100 * parseInt(t[4]), progressElement.hidden = !1) : (progressElement.value = null, progressElement.max = null, progressElement.hidden = !0), statusElement.innerHTML = e)
-                    }
-                },
-                totalDependencies: 0,
-                monitorRunDependencies: function(e) {
-                    this.totalDependencies = Math.max(this.totalDependencies, e), Module.setStatus(e ? "Preparing... (" + (this.totalDependencies - e) + "/" + this.totalDependencies + ")" : "All downloads complete.")
-                }
-            };
-            Module.setStatus("Downloading..."), window.onerror = function() {
-                Module.setStatus("An error occured, try to reload the page")
-            }
-        </script>
-        <script>
-            Module.preRun.push((function() {
-                addRunDependency("sync_writable_path"), FS.mkdir("/axmolPersistPath"), FS.mount(IDBFS, {}, "/axmolPersistPath"), FS.syncfs(!0, (function(t) {
-                    if (t) throw t;
-                    removeRunDependency("sync_writable_path")
-                })), TTY.stream_ops.write = function(t, r, n, o, e) {
-                    var u = t.tty;
-                    if (!u || !u.ops.put_char) throw new FS.ErrnoError(60);
-                    try {
-                        for (var a = 0; a < o; a++) {
-                            var p = r[n + a];
-                            null !== p && (0 != p && u.output.push(p))
-                        }
-                    } catch (t) {
-                        throw new FS.ErrnoError(29)
-                    }
-                    return out(UTF8ArrayToString(u.output, 0)), u.output = [], o && (t.node.timestamp = Date.now()), a
-                }
-            }))
-        </script>
-        <script>
-            (() => {
-                const e = getOS();
-                if (e && "iOS" == e.os && e.major < 15) document.body.innerHTML = '<div style="text-align:center">Oh no!<br/>Your iOS version isn\'t compatible with the game</div>';
-                else {
-                    var t = function(e) {
-                        var t = Math.min(window.devicePixelRatio || 1, 2);
-                        return {
-                            width: Math.floor(e.width * t),
-                            height: Math.floor(e.height * t)
-                        }
-                    };
-                    window.delay = (a = {}, function(e, t, i) {
-                        i in a && clearTimeout(a[i]), a[i] = setTimeout(e, t)
-                    }), window.getCanvasSize = () => {
-                        var e = window.innerWidth,
-                            t = window.innerHeight,
-                            i = e / t,
-                            n = document.getElementById("game-container");
-                        return n.style.width = "".concat(e, "px"), n.style.height = "".concat(t, "px"), maxRatio = 16 / 9, minRatio = 9 / 16, i > maxRatio ? n.style.width = "".concat(t * maxRatio, "px") : i < minRatio && (n.style.height = "".concat(e / minRatio, "px")), {
-                            width: parseInt(n.style.width),
-                            height: parseInt(n.style.height)
-                        }
-                    }, window.resizeCanvas = () => {
-                        var e = window.getCanvasSize(),
-                            i = t(e);
-                        0 != i.width && 0 != i.height && (Module.canvas.width == i.width && Module.canvas.height == i.height || window.delay((() => {
-                            Module.setCanvasSize(i.width, i.height), document.getElementById("canvas").style = "display: block; width:".concat(e.width, "px", "; height:", e.height, "px"), setTimeout((() => {
-                                Module.canvas.width == i.width && Module.canvas.height == i.height || window.resizeCanvas()
-                            }), 1e3)
-                        }), 1e3, "setCanvasSize"))
-                    };
-                    var i = function(e) {
-                        window.userInteracted = !0
-                    };
-                    document.addEventListener("touchstart", i, !0), document.addEventListener("touchend", i, !0), document.addEventListener("click", i, !0), document.addEventListener("keydown", i, !0), Module.preRun.push((function() {
-                        var e = t(window.getCanvasSize());
-                        Module.setCanvasSize(e.width, e.height)
-                    })), Module.postRun.push((function() {
-                        document.getElementById("game-container").style.display = "inline-block";
-                        var e = document.getElementById("initialization");
-                        e.parentNode.removeChild(e);
-                        var t = window.getCanvasSize();
-                        document.getElementById("canvas").style = "display: block; width:".concat(t.width, "px", "; height:", t.height, "px"), window.addEventListener("resize", window.resizeCanvas), PokiSDK.gameLoadingFinished()
-                    }));
-                    var n = function() {
-                        if (0 === window.innerWidth || 0 === window.innerHeight) window.addEventListener("resize", n, !0);
-                        else {
-                            window.removeEventListener("resize", n);
-                            var e = document.createElement("script");
-                            e.src = "MrBullet.js", document.body.appendChild(e)
-                        }
-                    };
-                    n()
-                }
-                var a
-            })()
-        </script>
-    </body>
+    </div>
 
-    </html>
+    <div class="emscripten_border" id="initialization">
+        <div class="emscripten" id="icon"><img src="icon.png"></div>
+        <div class="emscripten" id="name">Mr Bullet</div>
+        <div class="emscripten" id="status">Initialization...</div>
+        <div class="emscripten"><progress hidden id="progress" max="100" value="0"></progress></div>
+    </div>
+    <div id="game-container" style="display:none">
+        <canvas class="emscripten" id="canvas" style="display:block"></canvas>
+    </div>
+
+    <script>
+        for (var statusElement = document.getElementById("status"),
+                 progressElement = document.getElementById("progress"),
+                 hierarchyElement = document.getElementById("hierarchy"),
+                 nodeProperties = [],
+                 i = 0; i < 20; i++) nodeProperties[i] = document.getElementById("nodeProperty" + i);
+
+        var Module = {
+            preInit: [],
+            preRun: [],
+            postRun: [],
+            print: function(e) {
+                arguments.length > 1 && (e = Array.prototype.slice.call(arguments).join(" "));
+                console.log(e);
+            },
+            printErr: function(e) {
+                arguments.length > 1 && (e = Array.prototype.slice.call(arguments).join(" "));
+                console.error(e);
+            },
+            canvas: function() {
+                var e = document.getElementById("canvas");
+                if (e) {
+                    e.addEventListener("webglcontextlost", function(ev) {
+                        Module.ccall && Module.ccall("axmol_webglcontextlost");
+                        alert("WebGL context lost. You will need to reload the page.");
+                        ev.preventDefault();
+                    }, false);
+                    document.addEventListener("visibilitychange", () => {
+                        Module.ccall && Module.ccall("axmol_hdoc_visibilitychange", null, ["number"], [document.hidden ? 1 : 0]);
+                    });
+                    return e;
+                }
+            }(),
+            setStatus: function(e) {
+                if (!Module.setStatus.last) {
+                    Module.setStatus.last = {
+                        time: Date.now(),
+                        text: ""
+                    };
+                }
+                if (e !== Module.setStatus.last.text) {
+                    var t = e.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/),
+                        n = Date.now();
+                    if (!t || n - Module.setStatus.last.time >= 30) {
+                        Module.setStatus.last.time = n;
+                        Module.setStatus.last.text = e;
+                        if (t) {
+                            e = t[1];
+                            progressElement.value = 100 * parseInt(t[2]);
+                            progressElement.max = 100 * parseInt(t[4]);
+                            progressElement.hidden = !1;
+                        } else {
+                            progressElement.value = null;
+                            progressElement.max = null;
+                            progressElement.hidden = !0;
+                        }
+                        statusElement.innerHTML = e;
+                    }
+                }
+            },
+            totalDependencies: 0,
+            monitorRunDependencies: function(e) {
+                this.totalDependencies = Math.max(this.totalDependencies, e);
+                Module.setStatus(e ? "Preparing... (" + (this.totalDependencies - e) + "/" + this.totalDependencies + ")" : "All downloads complete.");
+            }
+        };
+        Module.setStatus("Downloading...");
+        window.onerror = function() {
+            Module.setStatus("An error occured, try to reload the page");
+        }
+    </script>
+    <script>
+        Module.preRun.push(function() {
+            addRunDependency("sync_writable_path");
+            FS.mkdir("/axmolPersistPath");
+            FS.mount(IDBFS, {}, "/axmolPersistPath");
+            FS.syncfs(!0, function(t) {
+                if (t) throw t;
+                removeRunDependency("sync_writable_path");
+            });
+            TTY.stream_ops.write = function(t, r, n, o, e) {
+                var u = t.tty;
+                if (!u || !u.ops.put_char) throw new FS.ErrnoError(60);
+                try {
+                    for (var a = 0; a < o; a++) {
+                        var p = r[n + a];
+                        null !== p && (0 != p && u.output.push(p));
+                    }
+                } catch (t) {
+                    throw new FS.ErrnoError(29);
+                }
+                out(UTF8ArrayToString(u.output, 0));
+                u.output = [];
+                o && (t.node.timestamp = Date.now());
+                return a;
+            }
+        });
+    </script>
+    <script>
+        (() => {
+            const e = getOS();
+            if (e && "iOS" == e.os && e.major < 15) {
+                document.body.innerHTML = '<div style="text-align:center">Oh no!<br/>Your iOS version isn\'t compatible with the game</div>';
+            } else {
+                var t = function(e) {
+                    var t = Math.min(window.devicePixelRatio || 1, 2);
+                    return {
+                        width: Math.floor(e.width * t),
+                        height: Math.floor(e.height * t)
+                    };
+                };
+                window.delay = (a = {}, function(e, t, i) {
+                    i in a && clearTimeout(a[i]);
+                    a[i] = setTimeout(e, t);
+                });
+                window.getCanvasSize = () => {
+                    var e = window.innerWidth,
+                        t = window.innerHeight,
+                        i = e / t,
+                        n = document.getElementById("game-container");
+                    n.style.width = e + "px";
+                    n.style.height = t + "px";
+                    maxRatio = 16 / 9;
+                    minRatio = 9 / 16;
+                    if (i > maxRatio) {
+                        n.style.width = (t * maxRatio) + "px";
+                    } else if (i < minRatio) {
+                        n.style.height = (e / minRatio) + "px";
+                    }
+                    return {
+                        width: parseInt(n.style.width),
+                        height: parseInt(n.style.height)
+                    };
+                };
+                window.resizeCanvas = () => {
+                    var e = window.getCanvasSize(),
+                        i = t(e);
+                    if (0 != i.width && 0 != i.height) {
+                        if (Module.canvas.width == i.width && Module.canvas.height == i.height) return;
+                        window.delay(() => {
+                            Module.setCanvasSize(i.width, i.height);
+                            document.getElementById("canvas").style = "display: block; width:" + e.width + "px; height:" + e.height + "px";
+                            setTimeout(() => {
+                                if (Module.canvas.width != i.width || Module.canvas.height != i.height) {
+                                    window.resizeCanvas();
+                                }
+                            }, 1000);
+                        }, 1000, "setCanvasSize");
+                    }
+                };
+                var i = function() {
+                    window.userInteracted = !0;
+                };
+                document.addEventListener("touchstart", i, !0);
+                document.addEventListener("touchend", i, !0);
+                document.addEventListener("click", i, !0);
+                document.addEventListener("keydown", i, !0);
+                Module.preRun.push(function() {
+                    var e = t(window.getCanvasSize());
+                    Module.setCanvasSize(e.width, e.height);
+                });
+                Module.postRun.push(function() {
+                    document.getElementById("game-container").style.display = "inline-block";
+                    var e = document.getElementById("initialization");
+                    e.parentNode.removeChild(e);
+                    var t = window.getCanvasSize();
+                    document.getElementById("canvas").style = "display: block; width:" + t.width + "px; height:" + t.height + "px";
+                    window.addEventListener("resize", window.resizeCanvas);
+                    PokiSDK.gameLoadingFinished();
+                });
+                var n = function() {
+                    if (0 === window.innerWidth || 0 === window.innerHeight) {
+                        window.addEventListener("resize", n, !0);
+                    } else {
+                        window.removeEventListener("resize", n);
+                        var e = document.createElement("script");
+                        e.src = "MrBullet.js";
+                        document.body.appendChild(e);
+                    }
+                };
+                n();
+            }
+            var a;
+        })();
+    </script>
+
+    <!-- ✨ Intro hide script -->
+    <script>
+        window.addEventListener("load", () => {
+            const intro = document.getElementById("intro-screen");
+            if (!intro) return;
+            setTimeout(() => {
+                intro.classList.add("hidden-intro");
+                setTimeout(() => intro.remove(), 800);
+            }, 2500);
+        });
+    </script>
+</body>
+</html>
