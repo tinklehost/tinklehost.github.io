@@ -163,6 +163,72 @@
       </div>
     </div>
   </div>
+<script>
+// URL REWRITER
+const oldPrefix = "https://tinklehost.github.io/games/bombparty/";
+const newPrefix = "https://tinklehost.github.io/bombparty/";
+
+// --- Helper to rewrite URLs ---
+function fixURL(url) {
+    if (typeof url !== "string") return url;
+    if (url.startsWith(oldPrefix)) {
+        return url.replace(oldPrefix, newPrefix);
+    }
+    return url;
+}
+
+// --- Intercept fetch() ---
+const originalFetch = window.fetch;
+window.fetch = function(resource, config) {
+    if (typeof resource === "string") {
+        resource = fixURL(resource);
+    }
+    return originalFetch(resource, config);
+};
+
+// --- Intercept XMLHttpRequest ---
+const OriginalXHR = XMLHttpRequest;
+XMLHttpRequest = function () {
+    const xhr = new OriginalXHR();
+    const originalOpen = xhr.open;
+    xhr.open = function(method, url, async, user, pass) {
+        url = fixURL(url);
+        return originalOpen.call(this, method, url, async, user, pass);
+    };
+    return xhr;
+};
+
+// --- Intercept <img> src setter ---
+const imgDesc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src");
+Object.defineProperty(HTMLImageElement.prototype, "src", {
+    set(value) {
+        return imgDesc.set.call(this, fixURL(value));
+    },
+    get() {
+        return imgDesc.get.call(this);
+    }
+});
+
+// --- Intercept Audio() constructor ---
+const OriginalAudio = window.Audio;
+window.Audio = function(src) {
+    return new OriginalAudio(fixURL(src));
+};
+
+// --- Intercept new Image().src after creation ---
+const OriginalImage = window.Image;
+window.Image = function(width, height) {
+    const img = new OriginalImage(width, height);
+    const originalSetAttribute = img.setAttribute;
+    img.setAttribute = function(name, value) {
+        if (name === "src") value = fixURL(value);
+        return originalSetAttribute.call(this, name, value);
+    };
+    return img;
+};
+
+console.log("%cURL Rewriter active: redirecting /games/bombparty → /bombparty", "color:#4caf50;");
+</script>
 
   <script src="socket.io/socket.io.js"></script>
   <script src="common/dom.js"></script>
