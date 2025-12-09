@@ -20,18 +20,34 @@
     a:active {
       color: yellow;
     }
+
+    /* Fullscreen iframe container */
+    #fullscreenFrame {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      display: none; /* hidden until chapter loads */
+      z-index: 999;
+    }
+
+    #fullscreenFrame iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
 
 <body>
-  <div class="container">
+  <div class="container" id="mainMenu">
     <img src="deltarune_logo.png" alt="DELTARUNE Logo" class="logo" />
     <p class="desc">Choose your chapter.</p>
 
     <div class="button-group">
       <button class="button" id="toggleChaptersBtn">Chapters</button>
 
-      <!-- keep "hidden" here, JS will remove it when showing -->
       <div id="chapterButtons" class="chapter-buttons hidden">
         <button onclick="loadChapter(1)" class="button">Chapter 1</button>
         <button onclick="loadChapter(2)" class="button">Chapter 2</button>
@@ -39,35 +55,35 @@
         <button onclick="loadChapter(4)" class="button">Chapter 4</button>
       </div>
     </div>
-
-    <!-- hidden by default so no bar until a chapter loads -->
-    <div id="gameFrame" class="game-frame hidden"></div>
   </div>
+
+  <!-- FULLSCREEN iframe overlay -->
+  <div id="fullscreenFrame"></div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const toggleChaptersBtn = document.getElementById('toggleChaptersBtn');
       const chapterButtons = document.getElementById('chapterButtons');
-      const gameFrame = document.getElementById('gameFrame');
+      const mainMenu = document.getElementById('mainMenu');
+      const fullscreenFrame = document.getElementById('fullscreenFrame');
 
       // Toggle chapters list
       toggleChaptersBtn.addEventListener('click', () => {
         const isShowing = chapterButtons.classList.toggle('show');
-
-        // when we first show it, remove "hidden" so display isn't stuck at none
-        if (isShowing) {
-          chapterButtons.classList.remove('hidden');
-        }
+        if (isShowing) chapterButtons.classList.remove('hidden');
       });
 
-      // Make loadChapter usable from inline onclick
+      // Load chapter in fullscreen
       window.loadChapter = function (num) {
-        // reveal the game frame
-        gameFrame.classList.remove('hidden');
+        // Hide the menu
+        mainMenu.style.display = 'none';
+
+        // Show the fullscreen iframe
+        fullscreenFrame.style.display = 'block';
 
         const chapterUrl = `https://tinklehost.github.io/deltarune/chapter${num}`;
 
-        gameFrame.innerHTML = `
+        fullscreenFrame.innerHTML = `
           <iframe src="${chapterUrl}" allowfullscreen></iframe>
         `;
       };
@@ -75,5 +91,4 @@
   </script>
 
 </body>
-
 </html>
