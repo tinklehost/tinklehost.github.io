@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <base href="https://cdn.jsdelivr.net/gh/genizy/web-port@main/undertale-yellow/">
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+    <link rel="icon" type="x-icon" href="favicon.png">
+    <title>UNDERTALE YELLOW</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+      @-webkit-keyframes rotation {
+        from { -webkit-transform: rotate(0deg); }
+        to { -webkit-transform: rotate(360deg); }
+      }
+      @-moz-keyframes rotation {
+        from { -moz-transform: rotate(0deg); }
+        to { -moz-transform: rotate(360deg); }
+      }
+      @-o-keyframes rotation {
+        from { -o-transform: rotate(0deg); }
+        to { -o-transform: rotate(360deg); }
+      }
+      @keyframes rotation {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      html {
+        background: #FFFFFF;
+      }
+
+      body {
+        font-family: arial;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        min-height: fill-available;
+        min-width: 100vw;
+        background: radial-gradient(
+          56.63% 56.63% at 50% 43.37%,
+          transparent 0%,
+          transparent 100%
+        );
+        background-color: black;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        place-items: center;
+      }
+
+      body.scrollingDisabled {
+        overflow: hidden;
+      }
+
+      .emscripten {
+        padding-right: 0;
+        display: block;
+      }
+
+      div.emscripten {
+        text-align: center;
+        font-family: "Lucida Console", Monaco, monospace;
+      }
+
+      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+      canvas.emscripten {
+        display: none;
+        background-color: black;
+        position: flex;
+        transition: opacity 5s ease-in;
+        -webkit-transition: opacity 5s ease-in;
+        opacity: 0;
+        filter: blur(0) grayscale(0);
+        image-rendering: optimizeSpeed;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: -o-crisp-edges;
+        image-rendering: pixelated;
+        -ms-interpolation-mode: nearest-neighbor;
+      }
+
+      canvas.active {
+        animation-name: fadeIn;
+        animation-duration: 2s;
+        opacity: 1;
+      }
+
+      canvas.paused {
+        animation-name: blur;
+        animation-duration: 0.5s;
+        filter: blur(2px) grayscale(1);
+      }
+
+      canvas.unpaused {
+        animation-name: none;
+      }
+
+      canvas.animatedSizeTransitions {
+        transition: width 0.3s ease, height 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+      }
+
+      @keyframes blur {
+        0% { filter: blur(0) grayscale(0); }
+        100% { filter: blur(2px) grayscale(1); }
+      }
+
+      .spinner {
+        height: 30px;
+        width: 30px;
+        -webkit-animation: rotation 0.8s linear infinite;
+        -moz-animation: rotation 0.8s linear infinite;
+        -o-animation: rotation 0.8s linear infinite;
+        animation: rotation 0.8s linear infinite;
+        border: 5px solid #bdff00;
+        border-top: 5px solid #719900;
+        border-radius: 100%;
+      }
+
+      #status {
+        display: inline-block;
+        vertical-align: top;
+        font-weight: bold;
+        color: white;
+      }
+
+      #progress {
+        width: 250px;
+        height: 10px;
+        -webkit-appearance: none;
+        appearance: none;
+        padding: 5px;
+      }
+
+      progress[value]::-webkit-progress-bar {
+        background-color: #8492a6;
+        height: 10px;
+        border-radius: 15px;
+      }
+      progress[value]::-webkit-progress-value {
+        background-image: -webkit-linear-gradient(left, #719900, #bdff00);
+        height: 10px;
+        border-radius: 15px;
+      }
+
+      div.loading {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+      }
+      div.loading > * {
+        padding: 10px;
+        margin: 10px;
+      }
+
+      .output-container {
+        text-align: center;
+        margin-top: auto;
+      }
+      .output-button {
+        border: none;
+        width: 200px;
+        height: 25px;
+        margin: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: black;
+        color: white;
+        outline-color: #20c20e;
+        outline-style: dashed;
+        font-family: "Lucida Console", Monaco, monospace;
+      }
+
+      #output {
+        display: none;
+        height: 200px;
+        background-color: black;
+        color: white;
+        font-family: "Lucida Console", Monaco, monospace;
+        outline: none;
+        border: none;
+        padding: 0;
+        width: 100%;
+      }
+
+      #message-container {
+        display: none;
+        min-height: 50px;
+        background-color: rgba(20, 20, 20, 0.5);
+        outline: none;
+        border: none;
+        padding: 0;
+        width: 100%;
+        position: absolute;
+        top: 0;
+      }
+
+      #messages {
+        margin-left: 50px;
+        color: white;
+        font-family: "Lucida Console", Monaco, monospace;
+        outline: none;
+        border: none;
+        padding: 0;
+      }
+
+      img.qrCode {
+        opacity: 1.0;
+        width: 50%;
+        height: 50%;
+      }
+
+      #pauseMenuContainer {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #pauseMenuContainer[hidden] {
+        display: none !important;
+        opacity: 0;
+      }
+
+      #pauseMenuBorder {
+        background: linear-gradient(135deg, #FA1E4E, transparent 40%);
+        padding: 1px;
+        border-radius: 4px;
+        clip-path: polygon(10.5px 0, 100% 0, 100% 100%, 0 100%, 0 10.5px);
+        width: 70vw;
+        max-width: 400px;
+      }
+
+      #pauseMenu {
+        display: flex;
+        flex-direction: column;
+        padding: 60px 30px 60px 30px;
+        background: linear-gradient(180deg, #2E273F 16.15%, rgba(46, 39, 63, 0.79) 56.25%, #2E273F 91.15%);
+        border-radius: 4px;
+        clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+        animation-name: fadeIn;
+        animation-duration: 0.5s;
+        opacity: 1;
+      }
+
+      #pauseMenu button {
+        font-weight: 500;
+        font-size: 17px;
+        color: white;
+        background: #FA1E4E;
+        border: 1px solid #FA1E4E;
+        border-radius: 6px;
+        padding: 12px 24px;
+        margin: 5px 0;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      #pauseMenu button#quitButton {
+        background: #FA1E4E40;
+      }
+
+      #pauseMenu button:hover {
+        filter: brightness(1.15);
+      }
+
+      #pauseMenu button:active {
+        filter: brightness(0.85);
+      }
+
+      #pauseMenu button[hidden] {
+        display: none;
+      }
+
+      /* --- Tinkle-style loader overlay --- */
+      #loader-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 24px;
+        pointer-events: none;
+        z-index: 2000;
+      }
+
+      .loader-panel {
+        pointer-events: auto;
+        width: min(640px, 100%);
+        max-height: 60vh;
+        background: radial-gradient(circle at top left, #414750 0, #1a1b20 55%, #111319 100%);
+        border-radius: 16px;
+        border: 1px solid rgba(211, 165, 16, 0.6);
+        box-shadow:
+          0 0 20px rgba(0, 0, 0, 0.8),
+          0 0 32px rgba(211, 165, 16, 0.35);
+        padding: 14px 16px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+
+      #loader-overlay.loader-hidden .loader-panel {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+
+      .loader-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      .loader-title {
+        font-family: "Orbitron", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 15px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        background: linear-gradient(90deg, #d3a410, #b7870f, #ffe4a1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 6px rgba(211, 165, 16, 0.45));
+        white-space: nowrap;
+      }
+
+      .loader-status {
+        font-size: 12px;
+        color: #f2f2f2;
+        opacity: 0.9;
+        flex: 1;
+        text-align: right;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      .loader-log {
+        background: rgba(0, 0, 0, 0.55);
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 11px;
+        color: #e4e4e4;
+        line-height: 1.35;
+        overflow-y: auto;
+        max-height: 26vh;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+      }
+
+      .loader-log::-webkit-scrollbar {
+        width: 6px;
+      }
+      .loader-log::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .loader-log::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 999px;
+      }
+
+      .loader-log-line-system {
+        color: #9cc9ff;
+      }
+
+      .loader-log-line-ok {
+        color: #8ee38e;
+      }
+
+      .loader-log-line-warn {
+        color: #ffd27f;
+      }
+
+      .loader-progress-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      #unity-loading-bar {
+        position: relative;
+        width: 100%;
+        height: 10px;
+        background: #262831;
+        border-radius: 999px;
+        overflow: hidden;
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+          0 0 18px rgba(211, 165, 16, 0.35);
+      }
+
+      #unity-progress-bar-full {
+        width: 0%;
+        height: 100%;
+        background-image: linear-gradient(90deg, #6e5210, #d3a410, #ffe4a1);
+        box-shadow: 0 0 16px rgba(255, 228, 161, 0.75);
+        border-radius: inherit;
+        transition: width 0.1s ease-out;
+      }
+
+      .loader-progress-text {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 12px;
+        color: #f5f5f5;
+        opacity: 0.9;
+      }
+
+      #loader-percent {
+        font-weight: 600;
+      }
+
+      #loader-detail {
+        font-size: 11px;
+        opacity: 0.8;
+      }
+
+      /* --- Intro screen --- */
+      #intro-screen {
+        position: fixed;
+        inset: 0;
+        background-color: #414141;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.7s ease, visibility 0.7s ease;
+      }
+
+      #intro-screen.hidden-intro {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      #intro-logo-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: fadeIn 1s ease-out forwards;
+      }
+
+      #intro-title {
+        font-family: "Orbitron", system-ui, -apple-system, BlinkMacSystemFont,
+          sans-serif;
+        font-size: 42px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        margin-bottom: 20px;
+        background: linear-gradient(90deg, #d3a410, #b7870f, #ffe4a1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 8px rgba(211, 165, 16, 0.4));
+        opacity: 0;
+        animation: titleFade 1s ease forwards 0.4s;
+        text-align: center;
+      }
+
+      @keyframes titleFade {
+        from {
+          opacity: 0;
+          transform: translateY(-12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          translate: 0px 36px;
+        }
+        50% {
+          translate: 0px 46px;
+        }
+      }
+      @keyframes bounce2 {
+        0%,
+        100% {
+          translate: 0px 46px;
+        }
+        50% {
+          translate: 0px 56px;
+        }
+      }
+      @keyframes umbral {
+        0% {
+          stop-color: #d3a5102e;
+        }
+        50% {
+          stop-color: rgba(211, 165, 16, 0.519);
+        }
+        100% {
+          stop-color: #d3a5102e;
+        }
+      }
+      @keyframes particles {
+        0%,
+        100% {
+          translate: 0px 16px;
+        }
+        50% {
+          translate: 0px 6px;
+        }
+      }
+
+      #particles {
+        animation: particles 4s ease-in-out infinite;
+      }
+      #animatedStop {
+        animation: umbral 4s infinite;
+      }
+      #bounce {
+        animation: bounce 4s ease-in-out infinite;
+        translate: 0px 36px;
+      }
+      #bounce2 {
+        animation: bounce2 4s ease-in-out infinite;
+        translate: 0px 46px;
+        animation-delay: 0.5s;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Intro screen -->
+    <div id="intro-screen">
+      <div id="intro-logo-wrapper">
+        <div id="intro-title">Tinkle Games</div>
+
+        <svg xmlns="http://www.w3.org/2000/svg" height="200" width="200">
+          <g style="order: -1;">
+            <polygon
+              transform="rotate(45 100 100)"
+              stroke-width="1"
+              stroke="#d3a410"
+              fill="none"
+              points="70,70 148,50 130,130 50,150"
+              id="bounce"
+            ></polygon>
+            <polygon
+              transform="rotate(45 100 100)"
+              stroke-width="1"
+              stroke="#d3a410"
+              fill="none"
+              points="70,70 148,50 130,130 50,150"
+              id="bounce2"
+            ></polygon>
+            <polygon
+              transform="rotate(45 100 100)"
+              stroke-width="2"
+              stroke=""
+              fill="#414750"
+              points="70,70 150,50 130,130 50,150"
+            ></polygon>
+            <polygon
+              stroke-width="2"
+              stroke=""
+              fill="url(#gradiente)"
+              points="100,70 150,100 100,130 50,100"
+            ></polygon>
+            <defs>
+              <linearGradient
+                y2="100%"
+                x2="10%"
+                y1="0%"
+                x1="0%"
+                id="gradiente"
+              >
+                <stop
+                  style="stop-color: #1e2026;stop-opacity:1"
+                  offset="20%"
+                ></stop>
+                <stop
+                  style="stop-color:#414750;stop-opacity:1"
+                  offset="60%"
+                ></stop>
+              </linearGradient>
+            </defs>
+            <polygon
+              transform="translate(20, 31)"
+              stroke-width="2"
+              stroke=""
+              fill="#b7870f"
+              points="80,50 80,75 80,99 40,75"
+            ></polygon>
+            <polygon
+              transform="translate(20, 31)"
+              stroke-width="2"
+              stroke=""
+              fill="url(#gradiente2)"
+              points="40,-40 80,-40 80,99 40,75"
+            ></polygon>
+            <defs>
+              <linearGradient
+                y2="100%"
+                x2="0%"
+                y1="-17%"
+                x1="10%"
+                id="gradiente2"
+              >
+                <stop
+                  style="stop-color: #d3a51000;stop-opacity:1"
+                  offset="20%"
+                ></stop>
+                <stop
+                  style="stop-color:#d3a51054;stop-opacity:1"
+                  offset="100%"
+                  id="animatedStop"
+                ></stop>
+              </linearGradient>
+            </defs>
+            <polygon
+              transform="rotate(180 100 100) translate(20, 20)"
+              stroke-width="2"
+              stroke=""
+              fill="#d3a410"
+              points="80,50 80,75 80,99 40,75"
+            ></polygon>
+            <polygon
+              transform="rotate(0 100 100) translate(60, 20)"
+              stroke-width="2"
+              stroke=""
+              fill="url(#gradiente3)"
+              points="40,-40 80,-40 80,85 40,110.2"
+            ></polygon>
+            <defs>
+              <linearGradient
+                y2="100%"
+                x2="10%"
+                y1="0%"
+                x1="0%"
+                id="gradiente3"
+              >
+                <stop
+                  style="stop-color: #d3a51000;stop-opacity:1"
+                  offset="20%"
+                ></stop>
+                <stop
+                  style="stop-color:#d3a51054;stop-opacity:1"
+                  offset="100%"
+                ></stop>
+              </linearGradient>
+            </defs>
+            <polygon
+              transform="rotate(45 100 100) translate(80, 95)"
+              stroke-width="2"
+              stroke=""
+              fill="#ffe4a1"
+              points="5,0 5,5 0,5 0,0"
+              id="particles"
+            ></polygon>
+            <polygon
+              transform="rotate(45 100 100) translate(80, 55)"
+              stroke-width="2"
+              stroke=""
+              fill="#ccb069"
+              points="6,0 6,6 0,6 0,0"
+              id="particles"
+            ></polygon>
+            <polygon
+              transform="rotate(45 100 100) translate(70, 80)"
+              stroke-width="2"
+              stroke=""
+              fill="#fff"
+              points="2,0 2,2 0,2 0,0"
+              id="particles"
+            ></polygon>
+            <polygon
+              stroke-width="2"
+              stroke=""
+              fill="#292d34"
+              points="29.5,99.8 100,142 100,172 29.5,130"
+            ></polygon>
+            <polygon
+              transform="translate(50, 92)"
+              stroke-width="2"
+              stroke=""
+              fill="#1f2127"
+              points="50,50 120.5,8 120.5,35 50,80"
+            ></polygon>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Tinkle Loader Overlay -->
+    <div id="loader-overlay">
+      <div class="loader-panel">
+        <div class="loader-header">
+          <div class="loader-title">TINKLE LOADER</div>
+          <div class="loader-status" id="loader-status">Booting pipeline…</div>
+        </div>
+        <div class="loader-log" id="loader-log">
+          <!-- log lines injected by JS -->
+        </div>
+        <div class="loader-progress-wrapper">
+          <div id="unity-loading-bar">
+            <div id="unity-progress-bar-full"></div>
+          </div>
+          <div class="loader-progress-text">
+            <span id="loader-percent">0%</span>
+            <span id="loader-detail">Waiting for downloads…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tinkle loader helper -->
+    <script>
+      window.TINKLE_LOADER = (function () {
+        const logQueue = [];
+        let elementsReady = false;
+        let loaderLog, loaderStatus, loaderPercent, loaderDetail;
+
+        function initElements() {
+          loaderLog = document.getElementById("loader-log");
+          loaderStatus = document.getElementById("loader-status");
+          loaderPercent = document.getElementById("loader-percent");
+          loaderDetail = document.getElementById("loader-detail");
+
+          elementsReady = !!loaderLog;
+          if (elementsReady && logQueue.length) {
+            logQueue.forEach(item => addLog(item.message, item.kind));
+            logQueue.length = 0;
+          }
+        }
+
+        function addLog(message, kind = "system") {
+          if (!elementsReady) {
+            logQueue.push({ message, kind });
+            return;
+          }
+          if (!loaderLog) return;
+
+          const line = document.createElement("div");
+          const time = new Date().toLocaleTimeString("en-US", {
+            hour12: false,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+          });
+
+          let cssClass = "loader-log-line-system";
+          if (kind === "ok") cssClass = "loader-log-line-ok";
+          else if (kind === "warn") cssClass = "loader-log-line-warn";
+
+          line.className = cssClass;
+          line.textContent = `[${time}] ${message}`;
+          loaderLog.appendChild(line);
+          loaderLog.scrollTop = loaderLog.scrollHeight;
+        }
+
+        function setStatus(text) {
+          if (!elementsReady) {
+            logQueue.push({ message: text, kind: "system" });
+          }
+          if (loaderStatus) loaderStatus.textContent = text;
+        }
+
+        function setProgress(p, detail) {
+          if (loaderPercent) {
+            loaderPercent.textContent = Math.round(p * 100) + "%";
+          }
+          if (loaderDetail && detail) {
+            loaderDetail.textContent = detail;
+          }
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", initElements);
+        } else {
+          initElements();
+        }
+
+        addLog("Tinkle loader initialized.", "system");
+
+        return {
+          addLog,
+          setStatus,
+          setProgress
+        };
+      })();
+    </script>
+
+    <canvas
+      class="emscripten"
+      id="canvas"
+      oncontextmenu="event.preventDefault()"
+      tabindex="-1"
+    >
+    </canvas>
+
+    <div id="pauseMenuContainer" hidden>
+      <div id="pauseMenuBorder">
+        <div id="pauseMenu">
+          <button id="resumeButton" onclick="resume()">
+            Resume
+          </button>
+          <button id="quitButton" onclick="quitIfSupported()">
+            Quit
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Original loading overlay (kept, but loader sits on top) -->
+    <div class="loading">
+      <div class="spinner" id="spinner"></div>
+      <div class="emscripten" id="status">Downloading...</div>
+      <progress value="0" max="100" id="progress" hidden="1"></progress>
+    </div>
+
+    <div id="message-container">
+      <div id="messages"></div>
+    </div>
+
+    <script>
+      // Merge game.unx parts and integrate with Tinkle loader
+      function mergeFiles(fileParts) {
+        window.TINKLE_LOADER.setStatus("Downloading game data…");
+        window.TINKLE_LOADER.addLog(
+          "Starting download of game.unx parts (" + fileParts.length + ")…",
+          "system"
+        );
+
+        let totalBytes = 0;
+        let loadedParts = 0;
+
+        return new Promise((resolve, reject) => {
+          let buffers = [];
+
+          function fetchPart(index) {
+            if (index >= fileParts.length) {
+              const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
+              window.TINKLE_LOADER.addLog(
+                "Finished downloading all game.unx parts. Total: " + totalMB + " MB.",
+                "ok"
+              );
+              window.TINKLE_LOADER.setStatus("Merging game data…");
+              window.TINKLE_LOADER.setProgress(0.95, "Merging game.unx blobs…");
+
+              let mergedBlob = new Blob(buffers);
+              let mergedFileUrl = URL.createObjectURL(mergedBlob);
+              resolve(mergedFileUrl);
+              return;
+            }
+
+            const partUrl = fileParts[index];
+            const partName = partUrl.split("/").pop() || partUrl;
+
+            window.TINKLE_LOADER.addLog("Fetching " + partName + "…", "system");
+
+            fetch(partUrl)
+              .then((response) => {
+                if (!response.ok) {
+                  const msg = "Failed to fetch " + partUrl + " (" + response.status + ")";
+                  window.TINKLE_LOADER.addLog(msg, "warn");
+                  throw new Error(msg);
+                }
+                return response.arrayBuffer();
+              })
+              .then((data) => {
+                buffers.push(data);
+                loadedParts++;
+                totalBytes += data.byteLength;
+
+                const partsProgress = loadedParts / fileParts.length;
+                const mbSoFar = (totalBytes / (1024 * 1024)).toFixed(2);
+
+                window.TINKLE_LOADER.setProgress(
+                  0.1 + partsProgress * 0.75, // 10%–85% of bar reserved for parts download
+                  "Downloading game data… (" +
+                    loadedParts +
+                    "/" +
+                    fileParts.length +
+                    " parts, " +
+                    mbSoFar +
+                    " MB so far)"
+                );
+
+                window.TINKLE_LOADER.addLog(
+                  "Loaded " +
+                    partName +
+                    " (" +
+                    (data.byteLength / (1024 * 1024)).toFixed(2) +
+                    " MB) [" +
+                    loadedParts +
+                    "/" +
+                    fileParts.length +
+                    "].",
+                  "ok"
+                );
+
+                fetchPart(index + 1);
+              })
+              .catch((err) => {
+                window.TINKLE_LOADER.setStatus("Error downloading data.");
+                window.TINKLE_LOADER.addLog("Error downloading " + partUrl + ": " + err, "warn");
+                reject(err);
+              });
+          }
+
+          fetchPart(0);
+        });
+      }
+
+      function getParts(file, start, end) {
+        let parts = [];
+        for (let i = start; i <= end; i++) {
+          parts.push(file + ".part" + i);
+        }
+        return parts;
+      }
+
+      mergeFiles(getParts("game.unx", 1, 12))
+        .then(async url => {
+          window.gameUnxUrl = url;
+
+          window.TINKLE_LOADER.addLog("Patcing fetch/XMLHttpRequest for game.unx…", "system");
+
+          const originalFetch = window.fetch;
+          window.fetch = async function (...args) {
+            let [url, options] = args;
+            if (typeof url === 'string' && url.includes("game.unx")) {
+              console.log("fetch:", url);
+              window.TINKLE_LOADER.addLog("Redirecting fetch for game.unx → merged blob URL.", "system");
+              url = window.gameUnxUrl;
+            } else if (url instanceof Request && url.url.includes("game.unx")) {
+              console.log("fetch request:", url.url);
+              window.TINKLE_LOADER.addLog("Redirecting fetch(Request) for game.unx → merged blob URL.", "system");
+              url = new Request(window.gameUnxUrl, url);
+            }
+            return originalFetch.call(this, url, options);
+          };
+
+          const originalOpen = XMLHttpRequest.prototype.open;
+          XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+            if (typeof url === "string" && url.includes("game.unx")) {
+              console.log("XHR:", url);
+              window.TINKLE_LOADER.addLog("Redirecting XHR for game.unx → merged blob URL.", "system");
+              url = window.gameUnxUrl;
+            }
+            return originalOpen.call(this, method, url, ...rest);
+          };
+
+          window.TINKLE_LOADER.setStatus("Launching engine…");
+          window.TINKLE_LOADER.setProgress(0.9, "Starting Undertale Yellow runtime…");
+          window.TINKLE_LOADER.addLog("Loading index.js and runner.js…", "system");
+
+          let index = document.createElement("script");
+          index.src = "index.js";
+          document.body.appendChild(index);
+
+          let runner = document.createElement("script");
+          runner.src = "runner.js";
+          document.body.appendChild(runner);
+        })
+        .catch(error => {
+          console.error("Failed to merge files:", error);
+          window.TINKLE_LOADER.setStatus("Fatal error downloading data.");
+          window.TINKLE_LOADER.addLog("Failed to merge game.unx parts: " + error, "warn");
+        });
+    </script>
+
+    <!-- Watch for game becoming ready and hide Tinkle loader -->
+    <script>
+      window.addEventListener("load", () => {
+        const intro = document.getElementById("intro-screen");
+        if (intro) {
+          setTimeout(() => {
+            intro.classList.add("hidden-intro");
+            setTimeout(() => intro.remove(), 800);
+          }, 2500);
+        }
+
+        const overlay = document.getElementById("loader-overlay");
+        const canvas = document.getElementById("canvas");
+        const spinner = document.getElementById("spinner");
+
+        let done = false;
+
+        const checkReady = setInterval(() => {
+          if (done) return;
+          const canvasVisible =
+            canvas &&
+            (canvas.style.display === "block" ||
+             canvas.classList.contains("active"));
+          const spinnerHidden =
+            spinner && spinner.style.display === "none";
+
+          if (canvasVisible || spinnerHidden) {
+            done = true;
+            window.TINKLE_LOADER.setStatus("Ready!");
+            window.TINKLE_LOADER.setProgress(1, "Game loaded.");
+            window.TINKLE_LOADER.addLog("Undertale Yellow is ready. Handing off to player.", "ok");
+
+            if (overlay) {
+              overlay.classList.add("loader-hidden");
+              setTimeout(() => overlay.remove(), 800);
+            }
+            clearInterval(checkReady);
+          }
+        }, 500);
+      });
+    </script>
+  </body>
+</html>
