@@ -2,126 +2,77 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DELTARUNE</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="icon" href="fav.ico" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DELTARUNE</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="fav.ico" />
 
-    <style>
-        a:visited {
-            color: yellow;
-        }
+  <style>
+    a:visited {
+      color: yellow;
+    }
 
-        a:hover {
-            color: rgba(255, 255, 0, 0.75);
-        }
+    a:hover {
+      color: rgba(255, 255, 0, 0.75);
+    }
 
-        a:active {
-            color: yellow;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .chapter-buttons {
-            margin-top: 1rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: center;
-        }
-
-        .game-frame {
-            margin-top: 20px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-
-        .game-frame iframe {
-            width: 90%;
-            height: 600px;
-            border: none;
-            border-radius: 10px;
-        }
-    </style>
+    a:active {
+      color: yellow;
+    }
+  </style>
 </head>
 
 <body>
-    <div class="container">
-        <img src="deltarune_logo.png" alt="DELTARUNE Logo" class="logo" />
-        <p class="desc">Choose your chapter.</p>
+  <div class="container">
+    <img src="deltarune_logo.png" alt="DELTARUNE Logo" class="logo" />
+    <p class="desc">Choose your chapter.</p>
 
-        <div class="button-group">
-            <button class="button" id="toggleChaptersBtn">Chapters</button>
+    <div class="button-group">
+      <button class="button" id="toggleChaptersBtn">Chapters</button>
 
-            <div id="chapterButtons" class="chapter-buttons hidden">
-                <button onclick="loadChapter(1)" class="button">Chapter 1</button>
-                <button onclick="loadChapter(2)" class="button">Chapter 2</button>
-                <button onclick="loadChapter(3)" class="button">Chapter 3</button>
-                <button onclick="loadChapter(4)" class="button">Chapter 4</button>
-            </div>
-        </div>
-
-        <div id="gameFrame" class="game-frame hidden"></div>
+      <!-- keep "hidden" here, JS will remove it when showing -->
+      <div id="chapterButtons" class="chapter-buttons hidden">
+        <button onclick="loadChapter(1)" class="button">Chapter 1</button>
+        <button onclick="loadChapter(2)" class="button">Chapter 2</button>
+        <button onclick="loadChapter(3)" class="button">Chapter 3</button>
+        <button onclick="loadChapter(4)" class="button">Chapter 4</button>
+      </div>
     </div>
 
-    <script>
-        const toggleChaptersBtn = document.getElementById('toggleChaptersBtn');
-        const chapterButtons = document.getElementById('chapterButtons');
-        const gameFrame = document.getElementById('gameFrame');
+    <!-- hidden by default so no bar until a chapter loads -->
+    <div id="gameFrame" class="game-frame hidden"></div>
+  </div>
 
-        // Toggles visibility of the chapter list
-        toggleChaptersBtn.addEventListener('click', () => {
-            chapterButtons.classList.toggle('hidden');
-        });
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleChaptersBtn = document.getElementById('toggleChaptersBtn');
+      const chapterButtons = document.getElementById('chapterButtons');
+      const gameFrame = document.getElementById('gameFrame');
 
-        // Load the selected chapter inside the page
-        function loadChapter(num) {
-            gameFrame.classList.remove('hidden');
-            const chapterUrl = `https://tinklehost.github.io/deltarune/chapter${num}`;
+      // Toggle chapters list
+      toggleChaptersBtn.addEventListener('click', () => {
+        const isShowing = chapterButtons.classList.toggle('show');
 
-            gameFrame.innerHTML = `
-                <iframe src="${chapterUrl}" allowfullscreen></iframe>
-            `;
+        // when we first show it, remove "hidden" so display isn't stuck at none
+        if (isShowing) {
+          chapterButtons.classList.remove('hidden');
         }
-    </script>
+      });
 
-    <!-- (Unrelated Cloudflare script you had) -->
-    <script>
-        (function () {
-            function c() {
-                var b = a.contentDocument || a.contentWindow.document;
-                if (b) {
-                    var d = b.createElement('script');
-                    d.innerHTML = "window.__CF$cv$params={r:'9ab085a7690bdb3a',t:'MTc2NTI0MTU3MA=='};var a=document.createElement('script');a.src='cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
-                    b.getElementsByTagName('head')[0].appendChild(d);
-                }
-            }
-            if (document.body) {
-                var a = document.createElement('iframe');
-                a.height = 1;
-                a.width = 1;
-                a.style.position = 'absolute';
-                a.style.top = 0;
-                a.style.left = 0;
-                a.style.border = 'none';
-                a.style.visibility = 'hidden';
-                document.body.appendChild(a);
-                if ('loading' !== document.readyState) c();
-                else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c);
-                else {
-                    var e = document.onreadystatechange || function () { };
-                    document.onreadystatechange = function (b) {
-                        e(b);
-                        'loading' !== document.readyState && (document.onreadystatechange = e, c());
-                    };
-                }
-            }
-        })();
-    </script>
+      // Make loadChapter usable from inline onclick
+      window.loadChapter = function (num) {
+        // reveal the game frame
+        gameFrame.classList.remove('hidden');
+
+        const chapterUrl = `https://tinklehost.github.io/deltarune/chapter${num}`;
+
+        gameFrame.innerHTML = `
+          <iframe src="${chapterUrl}" allowfullscreen></iframe>
+        `;
+      };
+    });
+  </script>
 
 </body>
 
