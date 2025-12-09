@@ -14,13 +14,13 @@ loadText('games/bombparty/text', navigator.language, () => {
 
 // Audio
 jklmAudio.load({
-  start: 'games/bombparty/sounds/ignite.wav',
-  selfTurn: 'games/bombparty/sounds/selfTurn.wav',
-  failWord: 'games/bombparty/sounds/failWord.wav',
-  failWord_alreadyUsed: 'games/bombparty/sounds/failWord_alreadyUsed.wav',
-  correctWord: 'games/bombparty/sounds/correctWord.wav',
-  explosion: 'games/bombparty/sounds/explosion.wav',
-  tick: 'games/bombparty/sounds/tick.wav',
+  start: 'https://tinklehost.github.io/bombparty/games/bombparty/sounds/ignite.wav',
+  selfTurn: 'https://tinklehost.github.io/bombparty/games/bombparty/sounds/selfTurn.wav',
+  failWord: 'https://tinklehost.github.io/bombparty/games/bombparty/sounds/failWord.wav',
+  failWord_alreadyUsed: 'https://tinklehost.github.io/bombparty/games/bombparty/sounds/failWord_alreadyUsed.wav',
+  correctWord: 'https://tinklehost.github.io/bombparty/games/bombparty/sounds/correctWord.wav',
+  explosion: 'https://tinklehost.github.io/bombparty/games/bombparty/sounds/explosion.wav',
+  tick: 'https://tinklehost.github.io/bombparty/games/bombparty/sounds/tick.wav',
 });
 
 // Setup and milestone
@@ -508,7 +508,7 @@ function seating_render() {
     const { winner } = milestone.lastRound;
     $('.middle .seating .lastRound .winnerPicture img').src =
       winner.picture == null
-        ? 'images/auth/guest.png'
+        ? 'https://tinklehost.github.io/bombparty/images/auth/guest.png'
         : `data:image/jpeg;base64,${winner.picture}`;
     $('.middle .seating .lastRound .winnerNickname').textContent =
       winner.nickname;
@@ -587,10 +587,10 @@ const explosionDuration = 500;
 const canvas = $('canvas');
 const ctx = canvas.getContext('2d', { alpha: true });
 
-const logo = jklmGfx.load('games/bombparty/images/logo@2x.png');
-const bomb = jklmGfx.load('games/bombparty/images/bomb.svg');
-const spark = jklmGfx.load('games/bombparty/images/spark.svg');
-const arrow = jklmGfx.load('games/bombparty/images/arrow.png');
+const logo = jklmGfx.load('https://tinklehost.github.io/bombparty/games/bombparty/images/logo@2x.png');
+const bomb = jklmGfx.load('https://tinklehost.github.io/bombparty/games/bombparty/images/bomb.svg');
+const spark = jklmGfx.load('https://tinklehost.github.io/bombparty/games/bombparty/images/spark.svg');
+const arrow = jklmGfx.load('https://tinklehost.github.io/bombparty/games/bombparty/images/arrow.png');
 
 const statsTimerTd = $('.rules .stats .timer td');
 
