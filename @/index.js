@@ -1,62 +1,48 @@
-// Simple helper using your search.js's search() function if available
-function normalizeInput(input, tmpl) {
-  input = input.trim();
-  if (!input) return '';
+// /@/index.js
 
-  if (typeof search === 'function') {
-    return search(input, tmpl);
+window.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("uv-form");
+  const address = document.getElementById("uv-address");
+  const engine = document.getElementById("uv-search-engine");
+  const errEl = document.getElementById("uv-error");
+  const errCodeEl = document.getElementById("uv-error-code");
+
+  function showError(msg, code = "") {
+    if (errEl) errEl.textContent = msg;
+    if (errCodeEl) errCodeEl.textContent = code;
   }
 
-  // fallback if search.js is broken / missing
-  const hasProtocol = /^https?:\/\//i.test(input);
-  const looksLikeDomain = /^[^ ]+\.[^ ]+/.test(input);
+  if (!form || !address) return;
 
-  if (!hasProtocol && looksLikeDomain) {
-    return 'https://' + input;
-  }
-
-  return input;
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('uv-form');
-  const addressEl = document.getElementById('uv-address');
-  const engineEl = document.getElementById('uv-search-engine');
-  const errorEl = document.getElementById('uv-error');
-  const errorCodeEl = document.getElementById('uv-error-code');
-
-  if (!form || !addressEl || !engineEl) return;
-
-  const showError = (msg, code = '') => {
-    if (errorEl) errorEl.textContent = msg || '';
-    if (errorCodeEl) errorCodeEl.textContent = code || '';
-  };
-
-  form.addEventListener('submit', (e) => {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
-    showError('', '');
+    showError("");
 
-    if (!window.__uv$config || !__uv$config.encodeUrl || !__uv$config.prefix) {
-      showError('Ultraviolet config not loaded.');
+    if (!window.__uv$config) {
+      showError("Ultraviolet config missing.");
       return;
     }
 
-    const raw = addressEl.value;
-    const tmpl = engineEl.value || 'https://www.duckduckgo.com/?q=%s';
-    const url = normalizeInput(raw, tmpl);
-
-    if (!url) {
-      showError('Please enter something to visit.');
+    const raw = address.value.trim();
+    if (!raw) {
+      showError("Enter a URL or search term.");
       return;
     }
+
+    const template =
+      (engine && engine.value) ||
+      "https://www.duckduckgo.com/?q=%s";
+
+    // Uses search.js function below
+    const targetUrl = search(raw, template);
 
     try {
-      const encoded = __uv$config.encodeUrl(url);
-      const proxied = __uv$config.prefix + encoded;
-      window.location.href = proxied; // e.g. /@/uv/<encoded>
+      const encoded = __uv$config.encodeUrl(targetUrl);
+      const finalUrl = __uv$config.prefix + encoded;
+      window.location.href = finalUrl;
     } catch (err) {
       console.error(err);
-      showError('Failed to encode URL.', String(err));
+      showError("Encoding failed.", String(err));
     }
   });
 });
