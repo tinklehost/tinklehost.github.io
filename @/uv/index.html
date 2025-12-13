@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>TinkleHost Proxy</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #111827, #020617);
+      color: #e5e7eb;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 640px;
+      padding: 24px;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 18px;
+      padding: 24px 20px 18px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(20px);
+    }
+
+    .title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 0 0 4px;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-bottom: 16px;
+    }
+
+    form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .input {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.8);
+      color: #e5e7eb;
+      outline: none;
+      font-size: 0.95rem;
+    }
+
+    .input::placeholder {
+      color: #6b7280;
+    }
+
+    .input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn {
+      border: none;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: white;
+      box-shadow: 0 10px 25px rgba(79, 70, 229, 0.55);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn span.icon {
+      font-size: 1rem;
+      transform: translateY(1px);
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .status {
+      font-size: 0.8rem;
+      margin-top: 10px;
+      color: #9ca3af;
+    }
+
+    .status.ok {
+      color: #22c55e;
+    }
+
+    .status.err {
+      color: #f97373;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="card">
+      <h1 class="title">TinkleHost Proxy</h1>
+      <div class="subtitle">Enter a URL or search term to start browsing.</div>
+
+      <form id="uv-form">
+        <input
+          id="uv-address"
+          class="input"
+          placeholder="example.com or https://example.com"
+          autocomplete="off"
+        />
+        <button class="btn" type="submit">
+          <span class="icon">🚀</span>
+          <span>Go</span>
+        </button>
+      </form>
+
+      <div class="hint">
+        Tip: You can just type <code>google.com</code> or a full
+        <code>https://</code> URL.
+      </div>
+
+      <div id="status" class="status"></div>
+    </div>
+  </div>
+
+  <!-- Ultraviolet core + config + handler -->
+  <!-- Make sure these files exist at /@/uv/... on tinklehost.github.io -->
+  <script src="/@/uv/uv.bundle.js" __uv-script></script>
+  <script src="/@/uv/uv.config.js" __uv-script></script>
+  <script src="/@/uv/uv.handler.js" __uv-script></script>
+
+  <script>
+    const statusEl = document.getElementById("status");
+
+    function setStatus(msg, type = "") {
+      statusEl.textContent = msg || "";
+      statusEl.className = "status" + (type ? " " + type : "");
+    }
+
+    // Register the UV service worker (if present)
+    (async () => {
+      if (!("serviceWorker" in navigator)) {
+        setStatus("Service workers not supported in this browser.", "err");
+        return;
+      }
+
+      try {
+        // __uv$config is defined in uv.config.js
+        await navigator.serviceWorker.register(__uv$config.sw, {
+          scope: __uv$config.prefix,
+        });
+        setStatus("Proxy ready.", "ok");
+        console.log("[UV] Service worker registered");
+      } catch (err) {
+        console.error("[UV] Service worker registration failed:", err);
+        setStatus("Proxy loaded, but service worker failed.", "err");
+      }
+    })();
+
+    // Normalize whatever the user types into a valid URL
+    function normalizeAddress(input) {
+      input = input.trim();
+      if (!input) return "";
+
+      // If it looks like a URL without protocol, add https://
+      const hasProtocol = /^https?:\/\//i.test(input);
+      const isLikeDomain = /^[^ \/.]+\.[^ ]+/.test(input);
+
+      if (!hasProtocol && isLikeDomain) {
+        return "https://" + input;
+      }
+
+      // If still nothing, you could optionally turn it into a search here.
+      return input;
+    }
+
+    // Form submit → encode URL → navigate to UV prefix
+    document.getElementById("uv-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      if (!window.__uv$config || !__uv$config.encodeUrl) {
+        setStatus("Ultraviolet config not loaded.", "err");
+        return;
+      }
+
+      const input = document.getElementById("uv-address").value;
+      const url = normalizeAddress(input);
+
+      if (!url) {
+        setStatus("Please enter a URL first.", "err");
+        return;
+      }
+
+      try {
+        const encoded = __uv$config.encodeUrl(url);
+        const proxied = __uv$config.prefix + encoded;
+        // Navigate the current window to the proxied URL
+        window.location.href = proxied;
+      } catch (err) {
+        console.error(err);
+        setStatus("Error encoding URL.", "err");
+      }
+    });
+  </script>
+</body>
+</html>
