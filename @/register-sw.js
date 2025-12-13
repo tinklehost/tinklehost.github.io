@@ -1,47 +1,33 @@
+// /@/register-sw.js
+
 async function registerSW() {
-  // Only run on browsers that support SW
-  if (!('serviceWorker' in navigator)) {
-    console.warn('[UV] Service workers not supported');
+  // Require SW support
+  if (!("serviceWorker" in navigator)) {
+    console.warn("[UV] Service workers not supported");
     return;
   }
 
-  // Require HTTPS unless localhost
-  const swAllowedHostnames = ['localhost', '127.0.0.1'];
+  // Require HTTPS for GitHub Pages
+  const allowedHosts = ["localhost", "127.0.0.1"];
   if (
-    location.protocol !== 'https:' &&
-    !swAllowedHostnames.includes(location.hostname)
+    location.protocol !== "https:" &&
+    !allowedHosts.includes(location.hostname)
   ) {
-    console.warn('[UV] Service workers require HTTPS');
+    console.warn("[UV] HTTPS required for service workers");
     return;
   }
 
   try {
-    // __uv$config is defined in uv.config.js
-    const reg = await navigator.serviceWorker.register(__uv$config.sw, {
-      scope: __uv$config.prefix,
-    });
+    // Use paths from uv.config.js
+    const swUrl = __uv$config.sw;      // '/@/uv/uv.sw.js'
+    const scope = __uv$config.prefix;  // '/@/uv/'
 
-    console.log(
-      '[UV] Service worker registered at',
-      __uv$config.sw,
-      'with scope',
-      __uv$config.prefix
-    );
+    const reg = await navigator.serviceWorker.register(swUrl, { scope });
 
-    const statusEl = document.getElementById('uv-status');
-    if (statusEl) {
-      statusEl.textContent = 'Proxy ready.';
-      statusEl.classList.add('ok');
-    }
+    console.log("[UV] SW registered:", swUrl, "scope:", scope);
   } catch (err) {
-    console.error('[UV] Service worker registration failed:', err);
-    const statusEl = document.getElementById('uv-status');
-    if (statusEl) {
-      statusEl.textContent = 'Service worker failed to register.';
-      statusEl.classList.add('err');
-    }
+    console.error("[UV] Service worker registration failed:", err);
   }
 }
 
-// run on load
 registerSW().catch(console.error);
