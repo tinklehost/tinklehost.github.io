@@ -49,55 +49,67 @@
       overflow: hidden;"></div>
     
     <script type="text/javascript" src="//imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
-<script>
-  function redirectAssets() {
-    // Redirect <img> sources
-    document.querySelectorAll('img').forEach(img => {
-      if (img.src.includes('https://tinklehost.github.io/assets/')) {
-        img.src = img.src.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
-        console.log('Redirected image:', img.src);
-      }
-    });
+    <script>
+  const ASSET_BASE_OLD = 'https://tinklehost.github.io/assets/';
+  const ASSET_BASE_NEW = 'https://tinklehost.github.io/deeeep.io/assets/';
 
-    // Redirect <script> sources
-    document.querySelectorAll('script').forEach(script => {
-      if (script.src && script.src.includes('https://tinklehost.github.io/assets/')) {
-        script.src = script.src.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
-        console.log('Redirected script:', script.src);
-      }
-    });
+  // ---- 1. Intercept fetch requests ----
+  const originalFetch = window.fetch;
+  window.fetch = async function(input, init) {
+    if (typeof input === 'string' && input.startsWith(ASSET_BASE_OLD)) {
+      input = input.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
+      console.log('Redirecting fetch to:', input);
+    }
+    return originalFetch(input, init);
+  };
 
-    // Redirect <link> sources (CSS, modulepreload, etc.)
-    document.querySelectorAll('link').forEach(link => {
-      if (link.href && link.href.includes('https://tinklehost.github.io/assets/')) {
-        link.href = link.href.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
-        console.log('Redirected link:', link.href);
-      }
-    });
+  // ---- 2. Intercept XHR requests ----
+  const originalOpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+    if (typeof url === 'string' && url.startsWith(ASSET_BASE_OLD)) {
+      url = url.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
+      console.log('Redirecting XHR to:', url);
+    }
+    return originalOpen.call(this, method, url, async, user, password);
+  };
 
-    // Redirect <video> or <audio> sources if needed
-    document.querySelectorAll('video, audio').forEach(media => {
-      if (media.src && media.src.includes('https://tinklehost.github.io/assets/')) {
-        media.src = media.src.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
-        console.log('Redirected media:', media.src);
+  // ---- 3. Redirect static DOM elements ----
+  function redirectDOMAssets() {
+    document.querySelectorAll('img, video, audio').forEach(el => {
+      if (el.src && el.src.startsWith(ASSET_BASE_OLD)) {
+        el.src = el.src.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
+        console.log('Redirected element src:', el.src);
       }
-      media.querySelectorAll('source').forEach(source => {
-        if (source.src && source.src.includes('https://tinklehost.github.io/assets/')) {
-          source.src = source.src.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
-          console.log('Redirected media source:', source.src);
+      el.querySelectorAll('source').forEach(source => {
+        if (source.src && source.src.startsWith(ASSET_BASE_OLD)) {
+          source.src = source.src.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
+          console.log('Redirected source:', source.src);
         }
       });
     });
+
+    document.querySelectorAll('script[type="module"]').forEach(s => {
+      if (s.src && s.src.startsWith(ASSET_BASE_OLD)) {
+        s.src = s.src.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
+        console.log('Redirected module script:', s.src);
+      }
+    });
+
+    document.querySelectorAll('link[rel="stylesheet"], link[rel="modulepreload"]').forEach(l => {
+      if (l.href && l.href.startsWith(ASSET_BASE_OLD)) {
+        l.href = l.href.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
+        console.log('Redirected link:', l.href);
+      }
+    });
   }
 
-  // Run immediately for DOM elements already loaded
-  redirectAssets();
+  // Run immediately
+  redirectDOMAssets();
 
-  // Run again when new elements are added dynamically
-  const observer = new MutationObserver(() => redirectAssets());
-  observer.observe(document.body, { childList: true, subtree: true });
+  // Observe new elements added dynamically
+  const observer = new MutationObserver(() => redirectDOMAssets());
+  observer.observe(document.documentElement, { childList: true, subtree: true });
 </script>
-
 
   </body>
 </html>
