@@ -49,28 +49,55 @@
       overflow: hidden;"></div>
     
     <script type="text/javascript" src="//imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
-  <script>
-  // Monkey-patch fetch to redirect certain asset requests
-  const originalFetch = window.fetch;
-  window.fetch = async function(input, init) {
-    if (typeof input === 'string' && input.includes('https://tinklehost.github.io/assets/')) {
-      // Redirect to the deeeep.io folder
-      input = input.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
-      console.log('Redirecting fetch to:', input);
-    }
-    return originalFetch(input, init);
-  };
+<script>
+  function redirectAssets() {
+    // Redirect <img> sources
+    document.querySelectorAll('img').forEach(img => {
+      if (img.src.includes('https://tinklehost.github.io/assets/')) {
+        img.src = img.src.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
+        console.log('Redirected image:', img.src);
+      }
+    });
 
-  // Monkey-patch XMLHttpRequest to handle legacy scripts using XHR
-  const originalOpen = XMLHttpRequest.prototype.open;
-  XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-    if (typeof url === 'string' && url.includes('https://tinklehost.github.io/assets/')) {
-      url = url.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
-      console.log('Redirecting XHR to:', url);
-    }
-    return originalOpen.call(this, method, url, async, user, password);
-  };
+    // Redirect <script> sources
+    document.querySelectorAll('script').forEach(script => {
+      if (script.src && script.src.includes('https://tinklehost.github.io/assets/')) {
+        script.src = script.src.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
+        console.log('Redirected script:', script.src);
+      }
+    });
+
+    // Redirect <link> sources (CSS, modulepreload, etc.)
+    document.querySelectorAll('link').forEach(link => {
+      if (link.href && link.href.includes('https://tinklehost.github.io/assets/')) {
+        link.href = link.href.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
+        console.log('Redirected link:', link.href);
+      }
+    });
+
+    // Redirect <video> or <audio> sources if needed
+    document.querySelectorAll('video, audio').forEach(media => {
+      if (media.src && media.src.includes('https://tinklehost.github.io/assets/')) {
+        media.src = media.src.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
+        console.log('Redirected media:', media.src);
+      }
+      media.querySelectorAll('source').forEach(source => {
+        if (source.src && source.src.includes('https://tinklehost.github.io/assets/')) {
+          source.src = source.src.replace('https://tinklehost.github.io/assets/', 'https://tinklehost.github.io/deeeep.io/assets/');
+          console.log('Redirected media source:', source.src);
+        }
+      });
+    });
+  }
+
+  // Run immediately for DOM elements already loaded
+  redirectAssets();
+
+  // Run again when new elements are added dynamically
+  const observer = new MutationObserver(() => redirectAssets());
+  observer.observe(document.body, { childList: true, subtree: true });
 </script>
+
 
   </body>
 </html>
