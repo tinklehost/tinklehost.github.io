@@ -49,16 +49,23 @@
       overflow: hidden;"></div>
     
     <script type="text/javascript" src="//imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
-    <script>
-  const ASSET_BASE_OLD = 'https://tinklehost.github.io/assets/';
-  const ASSET_BASE_NEW = 'https://tinklehost.github.io/deeeep.io/assets/';
+<script>
+  // Old-to-new path mappings
+  const PATH_REDIRECTS = [
+    { old: 'https://tinklehost.github.io/assets/', new: 'https://tinklehost.github.io/deeeep.io/assets/' },
+    { old: 'https://tinklehost.github.io/img/', new: 'https://tinklehost.github.io/deeeep.io/img/' }
+  ];
 
   // ---- 1. Intercept fetch requests ----
   const originalFetch = window.fetch;
   window.fetch = async function(input, init) {
-    if (typeof input === 'string' && input.startsWith(ASSET_BASE_OLD)) {
-      input = input.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
-      console.log('Redirecting fetch to:', input);
+    if (typeof input === 'string') {
+      PATH_REDIRECTS.forEach(p => {
+        if (input.startsWith(p.old)) {
+          input = input.replace(p.old, p.new);
+          console.log('Redirecting fetch to:', input);
+        }
+      });
     }
     return originalFetch(input, init);
   };
@@ -66,39 +73,63 @@
   // ---- 2. Intercept XHR requests ----
   const originalOpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-    if (typeof url === 'string' && url.startsWith(ASSET_BASE_OLD)) {
-      url = url.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
-      console.log('Redirecting XHR to:', url);
+    if (typeof url === 'string') {
+      PATH_REDIRECTS.forEach(p => {
+        if (url.startsWith(p.old)) {
+          url = url.replace(p.old, p.new);
+          console.log('Redirecting XHR to:', url);
+        }
+      });
     }
     return originalOpen.call(this, method, url, async, user, password);
   };
 
   // ---- 3. Redirect static DOM elements ----
   function redirectDOMAssets() {
+    // Images, video, audio
     document.querySelectorAll('img, video, audio').forEach(el => {
-      if (el.src && el.src.startsWith(ASSET_BASE_OLD)) {
-        el.src = el.src.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
-        console.log('Redirected element src:', el.src);
+      if (el.src) {
+        PATH_REDIRECTS.forEach(p => {
+          if (el.src.startsWith(p.old)) {
+            el.src = el.src.replace(p.old, p.new);
+            console.log('Redirected element src:', el.src);
+          }
+        });
       }
+      // <source> tags inside media
       el.querySelectorAll('source').forEach(source => {
-        if (source.src && source.src.startsWith(ASSET_BASE_OLD)) {
-          source.src = source.src.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
-          console.log('Redirected source:', source.src);
+        if (source.src) {
+          PATH_REDIRECTS.forEach(p => {
+            if (source.src.startsWith(p.old)) {
+              source.src = source.src.replace(p.old, p.new);
+              console.log('Redirected source:', source.src);
+            }
+          });
         }
       });
     });
 
+    // Scripts
     document.querySelectorAll('script[type="module"]').forEach(s => {
-      if (s.src && s.src.startsWith(ASSET_BASE_OLD)) {
-        s.src = s.src.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
-        console.log('Redirected module script:', s.src);
+      if (s.src) {
+        PATH_REDIRECTS.forEach(p => {
+          if (s.src.startsWith(p.old)) {
+            s.src = s.src.replace(p.old, p.new);
+            console.log('Redirected module script:', s.src);
+          }
+        });
       }
     });
 
+    // CSS / modulepreload links
     document.querySelectorAll('link[rel="stylesheet"], link[rel="modulepreload"]').forEach(l => {
-      if (l.href && l.href.startsWith(ASSET_BASE_OLD)) {
-        l.href = l.href.replace(ASSET_BASE_OLD, ASSET_BASE_NEW);
-        console.log('Redirected link:', l.href);
+      if (l.href) {
+        PATH_REDIRECTS.forEach(p => {
+          if (l.href.startsWith(p.old)) {
+            l.href = l.href.replace(p.old, p.new);
+            console.log('Redirected link:', l.href);
+          }
+        });
       }
     });
   }
@@ -110,6 +141,5 @@
   const observer = new MutationObserver(() => redirectDOMAssets());
   observer.observe(document.documentElement, { childList: true, subtree: true });
 </script>
-
   </body>
 </html>
