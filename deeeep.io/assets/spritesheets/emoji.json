@@ -1,0 +1,181 @@
+
+{"frames": {
+
+"emoji_angel.png":
+{
+	"frame": {"x":137,"y":1,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_angry.png":
+{
+	"frame": {"x":137,"y":68,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_angry_1.png":
+{
+	"frame": {"x":1,"y":1,"w":65,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":64},
+	"sourceSize": {"w":65,"h":64}
+},
+"emoji_annoyed.png":
+{
+	"frame": {"x":137,"y":135,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_awkward.png":
+{
+	"frame": {"x":204,"y":1,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_cool.png":
+{
+	"frame": {"x":204,"y":68,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_cool_1.png":
+{
+	"frame": {"x":204,"y":135,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_cry.png":
+{
+	"frame": {"x":1,"y":68,"w":65,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":64},
+	"sourceSize": {"w":65,"h":64}
+},
+"emoji_cry_1.png":
+{
+	"frame": {"x":271,"y":1,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_embarassed.png":
+{
+	"frame": {"x":338,"y":1,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_happy.png":
+{
+	"frame": {"x":405,"y":1,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_kiss.png":
+{
+	"frame": {"x":271,"y":68,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_love.png":
+{
+	"frame": {"x":271,"y":135,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_pleased.png":
+{
+	"frame": {"x":1,"y":135,"w":65,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":64},
+	"sourceSize": {"w":65,"h":64}
+},
+"emoji_poop.png":
+{
+	"frame": {"x":69,"y":1,"w":65,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":64},
+	"sourceSize": {"w":65,"h":64}
+},
+"emoji_sad.png":
+{
+	"frame": {"x":338,"y":68,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_surprised.png":
+{
+	"frame": {"x":69,"y":68,"w":65,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":64},
+	"sourceSize": {"w":65,"h":64}
+},
+"emoji_surprised_1.png":
+{
+	"frame": {"x":405,"y":68,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_surprised_2.png":
+{
+	"frame": {"x":69,"y":135,"w":65,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":64},
+	"sourceSize": {"w":65,"h":64}
+},
+"emoji_tongue.png":
+{
+	"frame": {"x":338,"y":135,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+"emoji_tongue_1.png":
+{
+	"frame": {"x":405,"y":135,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "emoji.png",
+	"format": "RGBA8888",
+	"size": {"w":470,"h":200},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:51ae4db6f7f1a76335c6e3cc7ed53d97:2178f9b181e9a306c423fe4f6d8419b1:3b6ee1b3efdb705ed941d972d580542a$"
+}
+}
