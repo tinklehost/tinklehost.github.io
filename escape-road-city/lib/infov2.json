@@ -1,0 +1,41 @@
+{
+  "allow_embed": "yes",
+  "allow_host": "yes",
+  "enable_ads": "no",
+  "debug_mode": "no",
+  "pub_id": "",
+  "unlock_timer": -1,
+  "timeShowInter": 60,
+  "timeShowReward": 60,
+  "sdkType": "h5",
+  "hostindex": 1,
+  "promotion": {
+    "enable": "no",
+    "size": 200,
+    "call_to_action": 1,
+    "call_to_action2": "no",
+    "promotion_list": [
+      {
+        "image": "https://api.azgames.io/data/image/promotion/escape-road-promotion.png",
+        "url": "https://azgames.io/escape-road"
+      },
+      {
+        "image": "https://api.azgames.io/data/image/promotion/escape-road-winter.png",
+        "url": "https://azgames.io/escape-road-winter"
+      },
+      {
+        "image": "https://api.azgames.io/data/image/promotion/escaperoadhalloween.png",
+        "url": "https://azgames.io/escape-road-halloween"
+      }
+    ]
+  },
+  "game": {
+    "name": "Escape Road City",
+    "description": "Escape Road City is a thrilling car chase game on the streets! Control your car, overcome all obstacles and escape from the police chase.",
+    "image": "https://api.azgames.io/data/image/game/escape-road-city-game.png",
+    "redirect_url": "https://azgames.io/escape-road-city",
+    "promotion": "",
+    "logo_url": "https://api.azgames.io/data/image/options/azgames.png",
+    "moregames_url": "https://azgames.io/?gid=G77"
+  }
+}

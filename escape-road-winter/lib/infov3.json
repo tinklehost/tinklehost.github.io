@@ -1,0 +1,42 @@
+{
+  "allow_embed": "yes",
+  "allow_host": "yes",
+  "enable_ads": "no",
+  "debug_mode": "no",
+  "pub_id": "escape-road-winter",
+  "unlock_timer": "15",
+  "timeShowInter": 120,
+  "timeShowReward": 120,
+  "sdkType": "wgplayer",
+  "hostindex": 2,
+  "promotion": {
+    "enable": "no",
+    "size": 200,
+    "call_to_action": 0,
+    "call_to_action2": null,
+    "promotion_list": [
+      {
+        "image": "https://api.1games.io/data/image/promotion/escaperoadhalloween2.png",
+        "url": "https://1games.io/escape-road-halloween"
+      },
+      {
+        "image": "https://api.1games.io/data/image/promotion/xmas-dash-game2.jpg",
+        "url": "https://1games.io/xmas-dash"
+      },
+      {
+        "image": "https://api.1games.io/data/image/promotion/snow-road-512x5123.png",
+        "url": "https://1games.io/snow-road"
+      }
+    ]
+  },
+  "game": {
+    "name": "Escape Road Winter",
+    "description": " Brave the icy terrain in Escape Road Winter and master the snowy roads. Engage in a cold-weather police chase and prove your drifting skills!",
+    "image": "https://api.1games.io/data/image/game/escape-road-winter/brave-the-icy-terrain-in-escape-road-winter-and-master-the-snowy-roads-engage-in-a-cold-weather-police-chase-and-prove-your-drifting-skills/escape-road-winter.png",
+    "redirect_url": "https://1games.io/",
+    "promotion": "",
+    "logo_url": "https://api.1games.io/data/image/options/logo1.png",
+    "moregames_url": "https://1games.io"
+  },
+  "adsDebug": "no"
+}
