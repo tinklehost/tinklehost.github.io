@@ -3,6 +3,16 @@
 
 <head>
     <script>
+  if (
+    location.hostname === "tinklehost.github.io" &&
+    location.pathname.startsWith("/room")
+  ) {
+    location.replace(
+      "/dj3d.io" + location.pathname
+    );
+  }
+</script>
+    <script>
   const OLD_BASE = 'https://tinklehost.github.io/';
   const NEW_BASE = 'https://tinklehost.github.io/dj3d.io/';
 
