@@ -4397,7 +4397,7 @@
                                 })
                             }), Object(dt.jsx)(a.b, {
                                 exact: !0,
-                                path: "/room/:roomId",
+                                path: "room/:roomId",
                                 component: ri
                             }), Object(dt.jsx)(a.b, {
                                 exact: !0,
