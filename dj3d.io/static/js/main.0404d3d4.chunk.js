@@ -1540,7 +1540,7 @@
             class Ve extends r.a.PureComponent {
                 constructor(t) {
                     super(t), this.errorInterval = void 0, this.onClickLeaveRoom = () => {
-                        window.location.href = ""
+                        window.location.href = "/"
                     }, this.createRoom = async() => {
                         this.setState({
                             status: "Creating room...",
@@ -1562,7 +1562,7 @@
                             "museum" === t && this.state.subredditId && rt("Reddit", "Create Reddit Room", this.state.subredditId), this.setState({
                                 status: "Room created! Send the URL to friends!",
                                 isLoading: !1
-                            }), Re.replace("".concat(this.props.path || "room", "/").concat(e.data.roomId)), this.setState({
+                            }), Re.replace("/".concat(this.props.path || "room", "/").concat(e.data.roomId)), this.setState({
                                 url: window.location.href
                             })
                         } catch (t) {
@@ -2273,7 +2273,7 @@
                 constructor() {
                     super(...arguments), this.onClickGoHome = () => {
                         let t = "";
-                        this.props.roomType && (t = this.props.roomType), window.location.href = "" + t
+                        this.props.roomType && (t = this.props.roomType), window.location.href = "/" + t
                     }
                 }
                 render() {
@@ -3731,10 +3731,10 @@
                             isIdle: !1
                         })
                     }, this.handleOnIdle = () => {
-                        "https://tinklehost.github.io/dj3d.io/" !== window.location.href && (this.setState({
+                        "https://dj3d.io/" !== window.location.href && (this.setState({
                             isIdle: !0
                         }), this.idleTimeout = setTimeout((() => {
-                            window.location.href = "https://tinklehost.github.io/dj3d.io/"
+                            window.location.href = "https://dj3d.io/"
                         }), 3e4))
                     }, this.analyticsPing = () => {
                         rt("Ping", "30s")
