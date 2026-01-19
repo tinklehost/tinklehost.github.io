@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <base href="https://rawcdn.githack.com/selenite-cc/selenite-old/9c743188888af0986c8c7b293dbac8f9e421a4ee/adventure-capitalist/">
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Unity WebGL Player | AdVenture Capitalist!</title>
+    
+    <!-- Font for intro title -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap"/>
+    
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <script src="TemplateData/UnityProgress.js"></script>
+    <script src="/js/all.js"></script>
+    
+    <style>
+        /* === FULLSCREEN PAGE === */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #231F20;
+        }
+
+        /* === INTRO OVERLAY === */
+        body.intro-active { overflow: hidden; }
+
+        #intro-screen {
+            position: fixed;
+            inset: 0;
+            background-color: #414141;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
+        }
+
+        #intro-screen.hidden-intro {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #intro-logo-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        #intro-title {
+            font-family: "Orbitron", sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #d3a410, #b7870f, #ffe4a1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(211,165,16,0.4));
+            opacity: 0;
+            animation: titleFade 1s ease forwards 0.4s;
+        }
+
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes titleFade { from { opacity:0; transform:translateY(-12px);} to{opacity:1; transform:translateY(0);} }
+
+        /* SVG animations */
+        @keyframes bounce { 0%,100%{ translate:0px 36px; } 50%{ translate:0px 46px; } }
+        @keyframes bounce2 { 0%,100%{ translate:0px 46px; } 50%{ translate:0px 56px; } }
+        @keyframes umbral { 0%{ stop-color:#d3a5102e; } 50%{ stop-color:rgba(211,165,16,0.519); } 100%{ stop-color:#d3a5102e; } }
+        @keyframes particles { 0%,100%{ translate:0px 16px; } 50%{ translate:0px 6px; } }
+
+        #particles { animation: particles 4s ease-in-out infinite; }
+        #animatedStop { animation: umbral 4s infinite; }
+        #bounce { animation: bounce 4s ease-in-out infinite; translate:0px 36px; }
+        #bounce2 { animation: bounce2 4s ease-in-out infinite; translate:0px 46px; animation-delay:0.5s; }
+        
+        /* Unity container */
+        .webgl-content, #unityContainer {
+            position: absolute;
+            width: 100% !important;
+            height: 100% !important;
+            top: 0;
+            left: 0;
+        }
+        
+        #unityContainer {
+            width: 100% !important;
+            height: 100% !important;
+            padding: 0px !important;
+            margin: 0px !important;
+            border: 0px !important;
+            position: absolute !important;
+            background: rgb(35, 31, 32) !important;
+        }
+        
+        #canvas {
+            width: 100% !important;
+            height: 100% !important;
+            background: #231F20 !important;
+        }
+        
+        #loadingBox {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+    </style>
+</head>
+ 
+<body class="template intro-active">
+    <!-- INTRO SCREEN - EXACT SAME AS ORIGINAL -->
+    <div id="intro-screen">
+        <div id="intro-logo-wrapper">
+            <div id="intro-title">Tinkle Games</div>
+
+            <!-- EXACT SAME SVG LOGO FROM ORIGINAL -->
+            <svg xmlns="http://www.w3.org/2000/svg" height="200" width="200">
+                <g style="order:-1;">
+                    <polygon transform="rotate(45 100 100)" stroke-width="1" stroke="#d3a410" fill="none" points="70,70 148,50 130,130 50,150" id="bounce"></polygon>
+                    <polygon transform="rotate(45 100 100)" stroke-width="1" stroke="#d3a410" fill="none" points="70,70 148,50 130,130 50,150" id="bounce2"></polygon>
+                    <polygon transform="rotate(45 100 100)" stroke-width="2" fill="#414750" points="70,70 150,50 130,130 50,150"></polygon>
+                    <polygon stroke-width="2" fill="url(#gradiente)" points="100,70 150,100 100,130 50,100"></polygon>
+                    <defs>
+                        <linearGradient y2="100%" x2="10%" y1="0%" x1="0%" id="gradiente">
+                            <stop style="stop-color:#1e2026;stop-opacity:1" offset="20%"></stop>
+                            <stop style="stop-color:#414750;stop-opacity:1" offset="60%"></stop>
+                        </linearGradient>
+                        <linearGradient y2="100%" x2="0%" y1="-17%" x1="10%" id="gradiente2">
+                            <stop style="stop-color:#d3a51000;stop-opacity:1" offset="20%"></stop>
+                            <stop style="stop-color:#d3a51054;stop-opacity:1" offset="100%" id="animatedStop"></stop>
+                        </linearGradient>
+                        <linearGradient y2="100%" x2="10%" y1="0%" x1="0%" id="gradiente3">
+                            <stop style="stop-color:#d3a51000;stop-opacity:1" offset="20%"></stop>
+                            <stop style="stop-color:#d3a51054;stop-opacity:1" offset="100%"></stop>
+                        </linearGradient>
+                    </defs>
+                    <polygon transform="translate(20,31)" stroke-width="2" fill="#b7870f" points="80,50 80,75 80,99 40,75"></polygon>
+                    <polygon transform="translate(20,31)" stroke-width="2" fill="url(#gradiente2)" points="40,-40 80,-40 80,99 40,75"></polygon>
+                    <polygon transform="rotate(180 100 100) translate(20,20)" stroke-width="2" fill="#d3a410" points="80,50 80,75 80,99 40,75"></polygon>
+                    <polygon transform="rotate(0 100 100) translate(60,20)" stroke-width="2" fill="url(#gradiente3)" points="40,-40 80,-40 80,85 40,110.2"></polygon>
+                    <polygon transform="rotate(45 100 100) translate(80,95)" stroke-width="2" fill="#ffe4a1" points="5,0 5,5 0,5 0,0" id="particles"></polygon>
+                    <polygon transform="rotate(45 100 100) translate(80,55)" stroke-width="2" fill="#ccb069" points="6,0 6,6 0,6 0,0" id="particles"></polygon>
+                    <polygon transform="rotate(45 100 100) translate(70,80)" stroke-width="2" fill="#fff" points="2,0 2,2 0,2 0,0" id="particles"></polygon>
+                    <polygon stroke-width="2" fill="#292d34" points="29.5,99.8 100,142 100,172 29.5,130"></polygon>
+                    <polygon transform="translate(50,92)" stroke-width="2" fill="#1f2127" points="50,50 120.5,8 120.5,35 50,80"></polygon>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- GAME CONTAINER -->
+    <div class="webgl-content">
+        <div id="unityContainer">
+            <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" width="335" height="667"></canvas>
+            
+            <div id="loadingBox">
+                <div id="bgBar"></div>
+                <div id="progressBar"></div>
+                <p id="loadingInfo">Loading...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script type='text/javascript'>
+        // === INTRO FADE-OUT ===
+        function hideIntro() {
+            const intro = document.getElementById("intro-screen");
+            if (intro) {
+                intro.classList.add("hidden-intro");
+                document.body.classList.remove("intro-active");
+                setTimeout(() => intro.remove(), 800);
+            }
+        }
+
+        // Show intro for ~2 seconds
+        setTimeout(hideIntro, 2000);
+        
+        // Resize canvas to fullscreen
+        function resizeCanvas() {
+            const canvas = document.getElementById('canvas');
+            const container = document.getElementById('unityContainer');
+            
+            if (canvas && container) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                canvas.style.width = window.innerWidth + "px";
+                canvas.style.height = window.innerHeight + "px";
+                
+                container.style.width = window.innerWidth + "px";
+                container.style.height = window.innerHeight + "px";
+            }
+        }
+        
+        // Apply resizing when page loads
+        window.addEventListener('load', function() {
+            resizeCanvas();
+            setTimeout(resizeCanvas, 50); // Extra delay for Unity
+        });
+        
+        window.addEventListener('resize', function() {
+            setTimeout(resizeCanvas, 50);
+        });
+
+        // Your existing Unity setup code
+        var Module = {
+            TOTAL_MEMORY: 201326592,
+            filePackagePrefixURL: "Release/",
+            memoryInitializerPrefixURL: "Release/",
+            preRun: [],
+            postRun: [],
+            print: (function() {
+                return function(text) {
+                    console.log(text);
+                };
+            })(),
+            printErr: function(text) {
+                console.error(text);
+            },
+            canvas: document.getElementById('canvas'),
+            progress: null,
+            setStatus: function(text) {
+                if (this.progress == null) {
+                    if (typeof UnityProgress != 'function')
+                        return;
+                    this.progress = new UnityProgress(canvas);
+                }
+                if (!Module.setStatus.last) Module.setStatus.last = {
+                    time: Date.now(),
+                    text: ''
+                };
+                if (text === Module.setStatus.text) return;
+                this.progress.SetMessage(text);
+                var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                if (m)
+                    this.progress.SetProgress(parseInt(m[2]) / parseInt(m[4]));
+                if (text === "")
+                    this.progress.Clear()
+            },
+            totalDependencies: 0,
+            monitorRunDependencies: function(left) {
+                this.totalDependencies = Math.max(this.totalDependencies, left);
+                Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+            }
+        };
+        Module.setStatus('Downloading (0.0/1)');
+    </script>
+    
+    <script src="Release/UnityConfig.js"></script>
+    <script src="Release/fileloader.js"></script>
+    
+    <script>
+        if (!console.logError) {
+            console.logError = function () {
+                console.error.apply(console, arguments);
+            };
+        }
+    </script>
+    
+    <script>
+        // Your existing webgl.js loading logic
+        if (!(!Math.fround)) {
+            var script = document.createElement('script');
+            script.src = "Release/webgl.js";
+            document.body.appendChild(script);
+        } else {
+            var codeXHR = new XMLHttpRequest();
+            codeXHR.open('GET', 'Release/webgl.js', true);
+            codeXHR.onload = function() {
+                var code = codeXHR.responseText;
+                if (!Math.fround) {
+                    try {
+                        console.log('optimizing out Math.fround calls');
+                        var m = /var ([^=]+)=global\.Math\.fround;/.exec(code);
+                        var minified = m[1];
+                        if (!minified) throw 'fail';
+                        var startAsm = code.indexOf('// EMSCRIPTEN_START_FUNCS');
+                        var endAsm = code.indexOf('// EMSCRIPTEN_END_FUNCS');
+                        var asm = code.substring(startAsm, endAsm);
+                        do {
+                            var moar = false;
+                            asm = asm.replace(new RegExp('[^a-zA-Z0-9\\$\\_]' + minified + '\\(', 'g'), function(s) {
+                                moar = true;
+                                return s[0] + '('
+                            });
+                        } while (moar);
+                        code = code.substring(0, startAsm) + asm + code.substring(endAsm);
+                        code = code.replace("'use asm'", "'almost asm'");
+                    } catch (e) {
+                        console.log('failed to optimize out Math.fround calls ' + e)
+                    }
+                }
+                var blob = new Blob([code], {
+                    type: 'text/javascript'
+                });
+                codeXHR = null;
+                var src = URL.createObjectURL(blob);
+                var script = document.createElement('script');
+                script.src = URL.createObjectURL(blob);
+                script.onload = function() {
+                    URL.revokeObjectURL(script.src);
+                };
+                document.body.appendChild(script);
+            };
+            codeXHR.send(null);
+        }
+    </script>
+</body>
+</html>
