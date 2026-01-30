@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <title>Flappy Dunk</title>
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <link rel="preload" href="src/assets/fonts/LuckiestGuy.ttf" as="font" type="font/ttf" crossorigin="">
+    <style>
+      #mybanner1 {
+        position: absolute;
+        bottom: 0px;
+        left: calc(50% - 160px);
+        z-index: 1000;
+      }
+    </style>
+    <script src="./lib/crazygames-sdk-v1.js"></script>
+    <script src="./lib/VOODOO-H5SDK.crazy.js"></script>
+    <link rel="icon" href="./gameIcon.png">    
+  </head>
+  <body>
+    <div id="mybanner1" style="width:320px;height:50px"></div>
+    <div id="loading">
+      <p>loading...</p>
+    </div>
+    <div class="canvas-container js-canvas-container">
+      <canvas class="js-canvas canvas"></canvas>
+      <div class="sound-btn"></div>
+      <div class="vibrate-btn"></div>
+      <div class="ui-game">
+        <div class="game-tuto">
+          <div class="ceiling"></div>
+          <div class="tap-to-jump"></div>
+          <div class="hoop"></div>
+          <div class="floor"></div>
+        </div>
+        <div class="pause js-pause"></div>
+        <div class="pause-menu">
+          <p class="text"></p>
+        </div>
+        <div class="score js-score"></div>
+        <div class="lost js-lost"></div>
+        <div class="revive-timer"></div>
+        <div class="ask-second-life">
+          <div class="black-circle">
+            <p></p>
+            <div class="timer"></div>
+          </div>
+          <div class="sub-text"></div>
+        </div>
+        <div class="js-text-color js-wording wording">
+          <div>
+            <span class="text-mutliplier js-wording-span"></span>
+            <span class="multiplier js-wording-span">
+              <span class="js-wording-span"></span>
+              <span class="multiplier js-multiplier js-wording-span">&nbsp;</span>
+            </span>
+          </div>
+        </div>
+        <div class="ball-interaction-zone"></div>
+      </div>
+      <div class="ui-main-menu">
+        <div class="facebook-btn">
+          <button class="share-btn">
+            <i class="gg-share"></i>
+            <span class="text-btn" style="padding-left:20px;">Share Score</span>
+          </button>
+          <button class="invite-btn">
+            <i class="gg-profile"></i>
+            <span class="text-btn" style="padding-left:10px;">Invite Friends</span>
+          </button>
+        </div>
+        <div class="scores">
+          <p class="best-score"></p>
+          <p class="last-score"></p>
+        </div>
+        <div class="ball">
+          <div>
+            <img class="wing-back-img">
+            <img class="ball-img">
+            <img class="wing-front-img">
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="./main.js"></script>
+</body>
+</html>

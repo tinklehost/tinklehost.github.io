@@ -1,0 +1,24 @@
+{
+    "mainMenu" : {
+        "best": "Best",
+        "last": "Last"
+    },
+    "gameUi": {
+        "perfect": "Perfect",
+        "pause": "Pause",
+        "watchAd": "Watch 1 ad to revive",
+        "tapToPass": "Tap to continue",
+        "tuto": {
+            "tap": "Tap to jump.",
+            "ceiling": "Don't touch the ceiling.",
+            "floor": "Don't touch the floor."
+        }
+    },
+    "facebook":{
+      "share": "Share Score",
+      "invite": "Invite Friends",
+      "bestScore" : "My best score is",
+      "try": "Try to beat me!",
+      "better":  "Can you do better ?"
+    }
+}
