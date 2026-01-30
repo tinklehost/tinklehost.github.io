@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <!-- Font for intro title -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap"/>
+    
+    <base href="https://cdn.jsdelivr.net/gh/genizy/web-port@latest/sonic.exe/">
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>GXC Game</title>
+    <style>
+      /* === INTRO OVERLAY === */
+      body.intro-active { overflow: hidden; }
+
+      #intro-screen {
+          position: fixed;
+          inset: 0;
+          background-color: #414141;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 99999;
+          transition: opacity 0.7s ease, visibility 0.7s ease;
+      }
+
+      #intro-screen.hidden-intro {
+          opacity: 0;
+          visibility: hidden;
+      }
+
+      #intro-logo-wrapper {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          animation: fadeIn 1s ease-out forwards;
+      }
+
+      #intro-title {
+          font-family: "Orbitron", sans-serif;
+          font-size: 42px;
+          font-weight: 700;
+          letter-spacing: 3px;
+          margin-bottom: 20px;
+          background: linear-gradient(90deg, #d3a410, #b7870f, #ffe4a1);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 0 8px rgba(211,165,16,0.4));
+          opacity: 0;
+          animation: titleFade 1s ease forwards 0.4s;
+      }
+
+      @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+      @keyframes titleFade { from { opacity:0; transform:translateY(-12px);} to{opacity:1; transform:translateY(0);} }
+
+      /* SVG animations */
+      @keyframes bounce { 0%,100%{ translate:0px 36px; } 50%{ translate:0px 46px; } }
+      @keyframes bounce2 { 0%,100%{ translate:0px 46px; } 50%{ translate:0px 56px; } }
+      @keyframes umbral { 0%{ stop-color:#d3a5102e; } 50%{ stop-color:rgba(211,165,16,0.519); } 100%{ stop-color:#d3a5102e; } }
+      @keyframes particles { 0%,100%{ translate:0px 16px; } 50%{ translate:0px 6px; } }
+
+      #particles { animation: particles 4s ease-in-out infinite; }
+      #animatedStop { animation: umbral 4s infinite; }
+      #bounce { animation: bounce 4s ease-in-out infinite; translate:0px 36px; }
+      #bounce2 { animation: bounce2 4s ease-in-out infinite; translate:0px 46px; animation-delay:0.5s; }
+      
+      /* Original styles */
+      @-webkit-keyframes rotation {
+        from {
+          -webkit-transform: rotate(0deg);
+        }
+
+        to {
+          -webkit-transform: rotate(360deg);
+        }
+      }
+
+      @-moz-keyframes rotation {
+        from {
+          -moz-transform: rotate(0deg);
+        }
+
+        to {
+          -moz-transform: rotate(360deg);
+        }
+      }
+
+      @-o-keyframes rotation {
+        from {
+          -o-transform: rotate(0deg);
+        }
+
+        to {
+          -o-transform: rotate(360deg);
+        }
+      }
+
+      @keyframes rotation {
+        from {
+          transform: rotate(0deg);
+        }
+
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      html {
+        background: #060612;
+      }
+
+      body {
+        font-family: arial;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        min-height: fill-available;
+        min-height: 100svh; /* Otherwise contents can be covered by an address bar in Safari on iOS 15 */
+        min-width: 100vw;
+        background: radial-gradient(
+          56.63% 56.63% at 50% 43.37%,
+          #1c1726 0%,
+          #060612 100%
+        );
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        place-items: center;
+      }
+
+      body.scrollingDisabled {
+        overflow: hidden;
+      }
+
+      .emscripten {
+        padding-right: 0;
+        display: block;
+      }
+
+      div.emscripten {
+        text-align: center;
+      }
+
+      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+      canvas.emscripten {
+        display: none;
+        border: 0px none;
+        background-color: black;
+        position: relative;
+        transition: opacity 5s ease-in;
+        -webkit-transition: opacity 5s ease-in;
+        opacity: 0;
+        filter: blur(0) grayscale(0);
+        margin-top: auto;
+        margin-bottom: auto;
+        image-rendering: optimizeSpeed;             /* Older versions of FF          */
+        image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
+        image-rendering: -webkit-optimize-contrast; /* Safari                        */
+        image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+        image-rendering: pixelated;                 /* Awesome future-browsers       */
+        -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+      }
+
+      canvas.active {
+        animation-name: fadeIn;
+        animation-duration: 2s;
+        opacity: 1;
+      }
+
+      canvas.paused {
+        animation-name: blur;
+        animation-duration: 0.5s;
+        filter: blur(2px) grayscale(1);
+      }
+
+      canvas.unpaused {
+        animation-name: none;
+      }
+
+      canvas.animatedSizeTransitions {
+        transition: width 0.3s ease, height 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes blur {
+        0% {
+          filter: blur(0) grayscale(0);
+        }
+
+        100% {
+          filter: blur(2px) grayscale(1);
+        }
+      }
+
+      .spinner {
+        height: 30px;
+        width: 30px;
+
+        -webkit-animation: rotation 0.8s linear infinite;
+        -moz-animation: rotation 0.8s linear infinite;
+        -o-animation: rotation 0.8s linear infinite;
+        animation: rotation 0.8s linear infinite;
+
+        border: 5px solid #bdff00;
+        border-top: 5px solid #719900;
+        border-radius: 100%;
+      }
+
+      .multiplayer-stats {
+        position: absolute;
+        left: 20px;
+        top: 20px;
+        font-family: monospace;
+        font-size: 8;
+        color: white;
+        visibility: hidden;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      #status {
+        display: inline-block;
+        vertical-align: top;
+        font-weight: bold;
+        color: white;
+      }
+
+      #progress {
+        width: 250px;
+        height: 10px;
+        -webkit-appearance: none;
+        appearance: none;
+        padding: 5px;
+      }
+
+      /* Determines the style of the background of the progress bar */
+      progress[value]::-webkit-progress-bar {
+        background-color: #8492a6;
+        height: 10px;
+        border-radius: 15px;
+      }
+      /* Determines the style of the completed part of the progress bar */
+      progress[value]::-webkit-progress-value {
+        background-image: -webkit-linear-gradient(left, #719900, #bdff00);
+        height: 10px;
+        border-radius: 15px;
+      }
+
+      div.loading {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+      }
+      div.loading > * {
+        padding: 10px;
+        margin: 10px;
+      }
+
+      .output-container {
+        text-align: center;
+        margin-top: auto;
+      }
+      .output-button {
+        border: none;
+        width: 200px;
+        height: 25px;
+        margin: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: black;
+        color: #20c20e;
+        font-family: "Lucida Console", Monaco, monospace;
+      }
+
+      #output {
+        display: none;
+        height: 200px;
+        background-color: black;
+        color: white;
+        font-family: "Lucida Console", Monaco, monospace;
+        outline: none;
+        border: none;
+        padding: 0;
+        width: 100%;
+      }
+
+      #message-container {
+        display: none;
+        min-height: 50px;
+        background-color: rgba(20, 20, 20, 0.5);
+        outline: none;
+        border: none;
+        padding: 0;
+        width: 100%;
+        position: absolute;
+        top: 0;
+      }
+
+      #messages {
+        margin-left: 50px;
+        color: white;
+        font-family: "Lucida Console", Monaco, monospace;
+        outline: none;
+        border: none;
+        padding: 0;
+      }
+
+      img.qrCode {
+         opacity: 1.0;
+         width: 50%;
+         height: 50%;
+      }
+
+      #pauseMenuContainer {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #pauseMenuContainer[hidden] {
+        display: none !important;
+        opacity: 0;
+      }
+
+      #pauseMenuBorder {
+        background: linear-gradient(135deg, #FA1E4E, transparent 40%);
+        padding: 1px;
+        border-radius: 4px;
+        clip-path: polygon(10.5px 0, 100% 0, 100% 100%, 0 100%, 0 10.5px);
+        width: 70vw;
+        max-width: 400px;
+      }
+
+      #pauseMenu {
+        display: flex;
+        flex-direction: column;
+        padding: 60px 30px 60px 30px;
+        background: linear-gradient(180deg, #2E273F 16.15%, rgba(46, 39, 63, 0.79) 56.25%, #2E273F 91.15%);
+        border-radius: 4px;
+        clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+        animation-name: fadeIn;
+        animation-duration: 0.5s;
+        opacity: 1;
+      }
+
+      #pauseMenu button {
+        font-weight: 500;
+        font-size: 17px;
+        color: white;
+        background: #FA1E4E;
+        border: 1px solid #FA1E4E;
+        border-radius: 6px;
+        padding: 12px 24px;
+        margin: 5px 0;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      #pauseMenu button#quitButton {
+        background: #FA1E4E40;
+      }
+
+      #pauseMenu button:hover {
+        filter: brightness(1.15);
+      }
+
+      #pauseMenu button:active {
+        filter: brightness(0.85);
+      }
+
+      #pauseMenu button[hidden] {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body class="intro-active">
+    <!-- INTRO SCREEN - EXACT SAME AS ORIGINAL -->
+    <div id="intro-screen">
+      <div id="intro-logo-wrapper">
+        <div id="intro-title">Tinkle Games</div>
+
+        <!-- EXACT SAME SVG LOGO FROM ORIGINAL -->
+        <svg xmlns="http://www.w3.org/2000/svg" height="200" width="200">
+          <g style="order:-1;">
+            <polygon transform="rotate(45 100 100)" stroke-width="1" stroke="#d3a410" fill="none" points="70,70 148,50 130,130 50,150" id="bounce"></polygon>
+            <polygon transform="rotate(45 100 100)" stroke-width="1" stroke="#d3a410" fill="none" points="70,70 148,50 130,130 50,150" id="bounce2"></polygon>
+            <polygon transform="rotate(45 100 100)" stroke-width="2" fill="#414750" points="70,70 150,50 130,130 50,150"></polygon>
+            <polygon stroke-width="2" fill="url(#gradiente)" points="100,70 150,100 100,130 50,100"></polygon>
+            <defs>
+              <linearGradient y2="100%" x2="10%" y1="0%" x1="0%" id="gradiente">
+                <stop style="stop-color:#1e2026;stop-opacity:1" offset="20%"></stop>
+                <stop style="stop-color:#414750;stop-opacity:1" offset="60%"></stop>
+              </linearGradient>
+              <linearGradient y2="100%" x2="0%" y1="-17%" x1="10%" id="gradiente2">
+                <stop style="stop-color:#d3a51000;stop-opacity:1" offset="20%"></stop>
+                <stop style="stop-color:#d3a51054;stop-opacity:1" offset="100%" id="animatedStop"></stop>
+              </linearGradient>
+              <linearGradient y2="100%" x2="10%" y1="0%" x1="0%" id="gradiente3">
+                <stop style="stop-color:#d3a51000;stop-opacity:1" offset="20%"></stop>
+                <stop style="stop-color:#d3a51054;stop-opacity:1" offset="100%"></stop>
+              </linearGradient>
+            </defs>
+            <polygon transform="translate(20,31)" stroke-width="2" fill="#b7870f" points="80,50 80,75 80,99 40,75"></polygon>
+            <polygon transform="translate(20,31)" stroke-width="2" fill="url(#gradiente2)" points="40,-40 80,-40 80,99 40,75"></polygon>
+            <polygon transform="rotate(180 100 100) translate(20,20)" stroke-width="2" fill="#d3a410" points="80,50 80,75 80,99 40,75"></polygon>
+            <polygon transform="rotate(0 100 100) translate(60,20)" stroke-width="2" fill="url(#gradiente3)" points="40,-40 80,-40 80,85 40,110.2"></polygon>
+            <polygon transform="rotate(45 100 100) translate(80,95)" stroke-width="2" fill="#ffe4a1" points="5,0 5,5 0,5 0,0" id="particles"></polygon>
+            <polygon transform="rotate(45 100 100) translate(80,55)" stroke-width="2" fill="#ccb069" points="6,0 6,6 0,6 0,0" id="particles"></polygon>
+            <polygon transform="rotate(45 100 100) translate(70,80)" stroke-width="2" fill="#fff" points="2,0 2,2 0,2 0,0" id="particles"></polygon>
+            <polygon stroke-width="2" fill="#292d34" points="29.5,99.8 100,142 100,172 29.5,130"></polygon>
+            <polygon transform="translate(50,92)" stroke-width="2" fill="#1f2127" points="50,50 120.5,8 120.5,35 50,80"></polygon>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div
+      id="loading-text"
+      style="
+        color: white;
+        font-size: 48px;
+        font-family: cursive;
+        text-align: center;
+        margin-top: 20px;
+      "
+    >
+      LOADING...
+    </div>
+    <canvas
+      class="emscripten"
+      id="canvas"
+      oncontextmenu="event.preventDefault()"
+      tabindex="-1"
+    >
+    </canvas>
+    <div id="pauseMenuContainer" hidden>
+      <div id="pauseMenuBorder">
+        <div id="pauseMenu">
+          <button id="resumeButton" onclick="resume()">
+            Resume
+          </button>
+          <button id="quitButton" onclick="quitIfSupported()">
+            Quit
+          </button>
+        </div>
+        </div>
+    </div>
+    <div class="loading">
+      <div class="spinner" id="spinner"></div>
+      <div class="emscripten" id="status">Downloading...</div>
+
+      <progress value="0" max="100" id="progress" hidden="1"></progress>
+      <img id="QRCode" class="qrCode" src="runner.svg" alt="URL QR Code" hidden="1"></img>
+      <img id="QR2Code" class="qrCode" src="runnerLocal.svg" alt="URL QR2 Code" hidden="1"></img>
+    </div>
+    <div class="multiplayer-stats" id="multiplayer-stats">
+      [no stats available]
+    </div>
+    <div class="output-container" id="output-container">
+      <button class="output-button" onclick="toggleConsole()">
+        Toggle Console
+      </button>
+      <button id="QRButton" class="output-button" onclick="toggleQRCode()">
+        Show QRCode
+      </button>
+      <button id="QR2Button" class="output-button" onclick="toggleQRCode2()">
+        Show Opera GX QRCode
+      </button>
+      <!--
+      <button id="webglbutton" class="output-button" onclick="toggleWebGLContext()">
+        Lose WebGL Context
+      </button>
+      -->
+      <button class="output-button" id="stats-button" style="visibility: hidden" onclick="toggleStats()">
+        Toggle Stats
+      </button>
+      <button class="output-button" id="share-button" style="visibility: hidden" onclick="navigator.clipboard.writeText(window.shareUrl)">
+        Copy Share Url
+      </button>
+      <button class="output-button" id="log-state-button" onclick="log_next_game_state()" style="visibility: hidden">
+        Log State
+      </button>
+      <textarea id="output" rows="8"></textarea>
+    </div>
+
+    <div id="message-container">
+      <div id="messages">
+      </div>
+    </div>
+
+    <script>
+      // === INTRO FADE-OUT ===
+      function hideIntro() {
+        const intro = document.getElementById("intro-screen");
+        if (intro) {
+          intro.classList.add("hidden-intro");
+          document.body.classList.remove("intro-active");
+          setTimeout(() => intro.remove(), 800);
+        }
+      }
+
+      // Show intro for ~2 seconds
+      setTimeout(hideIntro, 2000);
+    </script>
+
+    <script>
+        const loadingText = document.querySelector("#loading-text");
+      let totalBytes = 30702305.28;
+      let loadedBytes = 0;
+
+      function formatSize(bytes) {
+        if (bytes > 1024 * 1024 * 1024) {
+          return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+        } else if (bytes > 1024 * 1024) {
+          return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+        } else if (bytes > 1024) {
+          return (bytes / 1024).toFixed(2) + " KB";
+        } else {
+          return bytes + " B";
+        }
+      }
+      async function fetchWithProgress(url) {
+        const response = await fetch(url);
+        const reader = response.body.getReader();
+        let chunks = [];
+        let received = 0;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          received += value.length;
+          loadedBytes += value.length;
+          chunks.push(value);
+          const doneText = formatSize(loadedBytes);
+          const totalText = formatSize(totalBytes);
+          const percent =
+            totalBytes > 0
+              ? ((loadedBytes / totalBytes) * 100).toFixed(1)
+              : "?";
+          loadingText.textContent = `LOADING... ${doneText} / ${totalText} (${percent}%)`;
+        }
+        let fullBuffer = new Uint8Array(received);
+        let offset = 0;
+        for (let chunk of chunks) {
+          fullBuffer.set(chunk, offset);
+          offset += chunk.length;
+        }
+        return fullBuffer.buffer;
+      }
+      async function mergeFiles(parts) {
+        const buffers = await Promise.all(parts.map(fetchWithProgress));
+        return URL.createObjectURL(new Blob(buffers));
+      }
+
+      function getParts(file, count) {
+        let parts = [];
+        for (let i = 1; i <= count; i++) {
+          parts.push(file + ".part" + i);
+        }
+        return parts;
+      }
+      function resizeUnityContainer() {
+        var container = document.getElementById("gameContainer");
+        container.style.width = window.innerWidth + "px";
+        container.style.height = window.innerHeight + "px";
+      }
+      
+      // Modified to wait for intro fade-out
+      (async () => {
+        // Wait for intro to fade out (800ms)
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        const gameunx = getParts("game.unx", 2);
+        const gameunxs = [...gameunx];
+        const [gameurl] = await Promise.all([mergeFiles(gameunxs)]);
+
+            window.gameUnxUrl = gameurl;
+
+      const originalFetch = window.fetch;
+      window.fetch = async function (...args) {
+          let [url, options] = args;
+          if (typeof url === 'string' && url.includes("game.unx")) {
+              console.log("fetch:", url);
+              url = window.gameUnxUrl;
+          } else if (url instanceof Request && url.url.includes("game.unx")) {
+              console.log("fetch request:", url.url);
+              url = new Request(window.gameUnxUrl, url);
+          }
+          return originalFetch.call(this, url, options);
+      };
+
+      const originalOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+          if (url.includes("game.unx")) {
+              console.log("XHR:", url);
+              url = window.gameUnxUrl;
+          }
+          return originalOpen.call(this, method, url, ...rest);
+      };
+      loadingText.remove();
+          var indexscript = document.createElement("script");
+  indexscript.src= "index.js";
+  indexscript.type="text/javascript";
+
+    var runnerscript = document.createElement("script");
+  runnerscript.src= "runner.js";
+  runnerscript.async= true;
+  runnerscript.type="text/javascript";
+
+  document.body.appendChild(indexscript);
+    document.body.appendChild(runnerscript);
+      })();
+  </script>
+  </body>
+</html>
