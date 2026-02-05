@@ -1,61 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Unity WebGL Build</title>
-  <style>
-    body { margin: 0; background: #000; overflow: hidden; }
-    #unityContainer { width: 100vw; height: 100vh; position: relative; }
-    /* Optional YouTube overlay container */
-    #youtubeContainer {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 480px;
-      height: 270px;
-      z-index: 1000;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Unity WebGL + YouTube Overlay</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+  }
+  #unityContainer {
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    position: relative;
+  }
+  #youtubeOverlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 320px;
+    height: 180px;
+    z-index: 10;
+    pointer-events: none; /* Unity canvas captures input */
+  }
+</style>
 </head>
 <body>
-  <div id="unityContainer"></div>
-  <div id="youtubeContainer"></div> <!-- optional for YouTube videos -->
 
-  <script src="Build/WebGL.loader.js"></script>
-  <script>
-    const buildUrl = "Build"; // folder where your WebGL build files are
-    const loaderConfig = {
-      dataUrl: buildUrl + "/WebGL.data",
-      frameworkUrl: buildUrl + "/WebGL.framework.js",
-      codeUrl: buildUrl + "/WebGL.wasm",
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "YourCompany",
-      productName: "YourProduct",
-      productVersion: "1.0",
+<div id="unityContainer"></div>
+<div id="youtubeOverlay">
+  <!-- Example iframe for YouTube video -->
+  <iframe id="ytPlayer" width="320" height="180"
+          src="https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+</div>
+
+<script src="Build/WebGL.loader.js"></script>
+<script>
+(async function() {
+  const container = document.getElementById("unityContainer");
+
+  // Create canvas and patch Safari WebGL2 issue
+  const canvas = document.createElement("canvas");
+  canvas.width = container.clientWidth;
+  canvas.height = container.clientHeight;
+
+  // Patch missing Unity Safari WebGL2 fix
+  canvas.getContextSafariWebGL2Fixed = function() {
+    return this.getContext("webgl2") || this.getContext("experimental-webgl");
+  };
+
+  container.appendChild(canvas);
+
+  // Unity loader options
+  const unityConfig = {
+    dataUrl: "Build/WebGL.data",
+    frameworkUrl: "Build/WebGL.framework.js",
+    codeUrl: "Build/WebGL.wasm",
+    streamingAssetsUrl: "StreamingAssets",
+    companyName: "YourCompany",
+    productName: "YourProduct",
+    productVersion: "1.0",
+    canvas: canvas,
+    webglContextAttributes: {
+      preserveDrawingBuffer: false,
+      antialias: true,
+      alpha: false,
+      depth: true
+    }
+  };
+
+  try {
+    const unityInstance = await createUnityInstance(canvas, unityConfig, (progress) => {
+      console.log(`Unity loading progress: ${Math.round(progress * 100)}%`);
+    });
+
+    console.log("Unity loaded successfully!");
+
+    // Resume AudioContext after user gesture (required in Chrome/Safari)
+    const resumeAudio = () => {
+      if (unityInstance.Module) {
+        unityInstance.Module.audioContext?.resume();
+      }
+      document.removeEventListener("click", resumeAudio);
+    };
+    document.addEventListener("click", resumeAudio);
+
+    // Example: communicate with Unity (optional)
+    window.sendMessageToUnity = (obj, method, value) => {
+      unityInstance.SendMessage(obj, method, value);
     };
 
-    const container = document.querySelector("#unityContainer");
+  } catch (err) {
+    console.error("Failed to load Unity instance:", err);
+  }
+})();
+</script>
 
-    // Create Unity instance
-    createUnityInstance(container, loaderConfig).then((unityInstance) => {
-      console.log("Unity loaded successfully!");
-
-      // Example: load YouTube iframe inside your overlay
-      const youtubeContainer = document.getElementById("youtubeContainer");
-      const iframe = document.createElement("iframe");
-      iframe.width = "480";
-      iframe.height = "270";
-      iframe.src = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1";
-      iframe.frameBorder = "0";
-      iframe.allow =
-        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-      iframe.allowFullscreen = true;
-      youtubeContainer.appendChild(iframe);
-
-    }).catch((err) => {
-      console.error(err);
-      alert("Failed to load Unity: " + err);
-    });
-  </script>
 </body>
 </html>
