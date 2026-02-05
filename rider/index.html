@@ -1,141 +1,64 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Unity WebGL</title>
-
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
-
-  <link rel="stylesheet" href="TemplateData/style.css">
-
+  <meta charset="UTF-8">
+  <title>Your Unity WebGL Game</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      overflow: hidden;
-    }
-
-    #unity-container {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-    }
-
-    #unity-canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      background: #000;
-    }
+    body { margin: 0; background: #000; overflow: hidden; }
+    #unityContainer { width: 100vw; height: 100vh; }
   </style>
 </head>
-
 <body>
-  <div id="unity-container">
-    <canvas id="unity-canvas" tabindex="-1"></canvas>
+  <!-- Unity WebGL container -->
+  <div id="unityContainer"></div>
 
-    <div id="unity-loading-bar">
-      <div id="unity-logo"></div>
-      <div id="unity-progress-bar-empty">
-        <div id="unity-progress-bar-full"></div>
-      </div>
-    </div>
-  </div>
+  <!-- Stub for YouTube Playables / Unity firstFrameReady -->
   <script>
-  // Hard-disable YouTube Playables first-frame hook outside YT
-  window._SendFirstFrameReady = function () {
-    console.log("_SendFirstFrameReady stubbed (non-YouTube environment)");
-  };
-</script>
+    // Ensure the YouTube Playables object exists
+    window.ytgame = window.ytgame || {};
+    ytgame.events = ytgame.events || {};
 
-  <script>
-  (function () {
-    const events = {
-      firstFrameReady: function () {
-        console.log("ytgame.events.firstFrameReady (locked stub)");
-      }
+    // Stub firstFrameReady so Unity doesn't throw
+    ytgame.events.firstFrameReady = function() {
+      console.log("Unity called firstFrameReady");
     };
 
-    Object.defineProperty(window, "ytgame", {
-      configurable: false,
-      get() {
-        return { events };
-      },
-      set(value) {
-        // If Unity tries to overwrite ytgame, re-inject events
-        if (value && typeof value === "object") {
-          value.events = value.events || events;
-          return value;
-        }
-      }
-    });
-  })();
-</script>
+    // Optional stubs for other common Unity calls
+    ytgame.events.sendStats = function(stats) {
+      console.log("sendStats called", stats);
+    };
+    ytgame.events.sendTelemetry = function(data) {
+      console.log("sendTelemetry called", data);
+    };
+    ytgame.events.sendEvent = function(name, data) {
+      console.log("sendEvent called", name, data);
+    };
+  </script>
 
+  <!-- Unity loader script -->
+  <script src="Build/WebGL.loader.js"></script>
   <script>
-  // Full YouTube Playables API stub for non-YT environments
-  window.ytgame = {
-    events: {
-      firstFrameReady: function () {
-        console.log("ytgame.events.firstFrameReady (stub)");
-      }
-    },
-
-    SendFirstFrameReady: function () {
-      console.log("ytgame.SendFirstFrameReady (stub)");
-    },
-
-    GameReady: function () {
-      console.log("ytgame.GameReady (stub)");
-    },
-
-    GameOver: function () {
-      console.log("ytgame.GameOver (stub)");
-    }
-  };
-</script>
-
-  <script>
-    const canvas = document.querySelector("#unity-canvas");
-    const loadingBar = document.querySelector("#unity-loading-bar");
-    const progressBarFull = document.querySelector("#unity-progress-bar-full");
-
     const buildUrl = "Build";
-    const loaderUrl = buildUrl + "/WebGL.loader.js";
-
     const config = {
-      dataUrl: buildUrl + "/WebGL.data",
+      dataUrl: buildUrl + "/data.unity3d",
       frameworkUrl: buildUrl + "/WebGL.framework.js",
       codeUrl: buildUrl + "/WebGL.wasm",
-      streamingAssetsUrl: "StreamingAssets/aa",
-      companyName: "Ketchapp",
-      productName: "Rider",
-      productVersion: "2.22.3.00",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "YourCompany",
+      productName: "YourGame",
+      productVersion: "1.0",
+      showBanner: (msg) => console.log(msg)
     };
 
-    loadingBar.style.display = "block";
+    // Create Unity instance
+    createUnityInstance(document.querySelector("#unityContainer"), config)
+      .then((unityInstance) => {
+        console.log("Unity loaded successfully");
 
-    const script = document.createElement("script");
-    script.src = loaderUrl;
-    script.onload = () => {
-      createUnityInstance(canvas, config, (progress) => {
-        progressBarFull.style.width = (progress * 100) + "%";
-      }).then(() => {
-        loadingBar.style.display = "none";
-      }).catch((message) => {
-        console.error(message);
-        alert(message);
-      });
-    };
-
-    document.body.appendChild(script);
+        // Optional: handle first-frame ready manually
+        // unityInstance.SendMessage("YourGameObject", "YourMethod", "param");
+      })
+      .catch((err) => console.error(err));
   </script>
 </body>
 </html>
-
-
-
-
