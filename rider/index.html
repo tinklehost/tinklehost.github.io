@@ -5,30 +5,19 @@
   <title>Unity WebGL Build</title>
   <style>
     body, html { margin: 0; padding: 0; height: 100%; background: #000; }
-    #unityContainer { width: 100%; height: 100%; position: relative; }
-    #youtubeOverlay { position: absolute; top: 10px; right: 10px; width: 320px; height: 180px; z-index: 10; }
+    #unityContainer { width: 100%; height: 100%; }
   </style>
 </head>
 <body>
 
   <div id="unityContainer"></div>
-  <!-- Optional YouTube iframe overlay -->
-  <div id="youtubeOverlay">
-    <iframe width="320" height="180"
-      src="https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=0"
-      frameborder="0" allowfullscreen>
-    </iframe>
-  </div>
 
   <script src="Build/WebGL.loader.js"></script>
   <script>
-    // Unity configuration
-    const buildUrl = "Build";
-    const loaderUrl = buildUrl + "/WebGL.loader.js";
     const config = {
-      dataUrl: buildUrl + "/WebGL.data",
-      frameworkUrl: buildUrl + "/WebGL.framework.js",
-      codeUrl: buildUrl + "/WebGL.wasm",
+      dataUrl: "Build/WebGL.data",
+      frameworkUrl: "Build/WebGL.framework.js",
+      codeUrl: "Build/WebGL.wasm",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "YourCompany",
       productName: "YourProduct",
@@ -36,8 +25,6 @@
       devicePixelRatio: window.devicePixelRatio,
       canvas: document.getElementById("unityContainer"),
       matchWebGLToCanvasSize: true,
-      // Optional: show a loading bar
-      // onProgress: (unityInstance, progress) => { console.log(progress); }
     };
 
     // Safari WebGL fix
@@ -54,7 +41,7 @@
       .then(unityInstance => {
         console.log("Unity loaded successfully");
 
-        // Resume AudioContext after user gesture
+        // Resume AudioContext on first user gesture
         const resumeAudio = () => {
           const ctx = unityInstance.Module?.audioContext;
           if (ctx && ctx.state === "suspended") ctx.resume();
