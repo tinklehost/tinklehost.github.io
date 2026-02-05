@@ -45,6 +45,13 @@
     </div>
   </div>
   <script>
+  // Hard-disable YouTube Playables first-frame hook outside YT
+  window._SendFirstFrameReady = function () {
+    console.log("_SendFirstFrameReady stubbed (non-YouTube environment)");
+  };
+</script>
+
+  <script>
   (function () {
     const events = {
       firstFrameReady: function () {
@@ -128,6 +135,7 @@
   </script>
 </body>
 </html>
+
 
 
 
