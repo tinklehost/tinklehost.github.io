@@ -45,6 +45,30 @@
     </div>
   </div>
   <script>
+  (function () {
+    const events = {
+      firstFrameReady: function () {
+        console.log("ytgame.events.firstFrameReady (locked stub)");
+      }
+    };
+
+    Object.defineProperty(window, "ytgame", {
+      configurable: false,
+      get() {
+        return { events };
+      },
+      set(value) {
+        // If Unity tries to overwrite ytgame, re-inject events
+        if (value && typeof value === "object") {
+          value.events = value.events || events;
+          return value;
+        }
+      }
+    });
+  })();
+</script>
+
+  <script>
   // Full YouTube Playables API stub for non-YT environments
   window.ytgame = {
     events: {
@@ -104,5 +128,6 @@
   </script>
 </body>
 </html>
+
 
 
