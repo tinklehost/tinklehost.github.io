@@ -45,19 +45,28 @@
     </div>
   </div>
   <script>
-  // Stub YouTube Playables API for non-YT environments
+  // Full YouTube Playables API stub for non-YT environments
   window.ytgame = {
+    events: {
+      firstFrameReady: function () {
+        console.log("ytgame.events.firstFrameReady (stub)");
+      }
+    },
+
     SendFirstFrameReady: function () {
-      console.log("ytgame.SendFirstFrameReady (stubbed)");
+      console.log("ytgame.SendFirstFrameReady (stub)");
     },
+
     GameReady: function () {
-      console.log("ytgame.GameReady (stubbed)");
+      console.log("ytgame.GameReady (stub)");
     },
+
     GameOver: function () {
-      console.log("ytgame.GameOver (stubbed)");
+      console.log("ytgame.GameOver (stub)");
     }
   };
 </script>
+
   <script>
     const canvas = document.querySelector("#unity-canvas");
     const loadingBar = document.querySelector("#unity-loading-bar");
@@ -95,4 +104,5 @@
   </script>
 </body>
 </html>
+
 
