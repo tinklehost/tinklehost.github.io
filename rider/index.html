@@ -44,7 +44,20 @@
       </div>
     </div>
   </div>
-
+  <script>
+  // Stub YouTube Playables API for non-YT environments
+  window.ytgame = {
+    SendFirstFrameReady: function () {
+      console.log("ytgame.SendFirstFrameReady (stubbed)");
+    },
+    GameReady: function () {
+      console.log("ytgame.GameReady (stubbed)");
+    },
+    GameOver: function () {
+      console.log("ytgame.GameOver (stubbed)");
+    }
+  };
+</script>
   <script>
     const canvas = document.querySelector("#unity-canvas");
     const loadingBar = document.querySelector("#unity-loading-bar");
@@ -82,3 +95,4 @@
   </script>
 </body>
 </html>
+
