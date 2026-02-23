@@ -3,56 +3,106 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Ultimate Car Driving Game</title>
+    <title>Ultimate Car Driving Game</title>
     <link rel="shortcut icon" href="TemplateData/img/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/css/style.css">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: black;
+        }
+
+        /* Remove aspect ratio restriction */
+        .keepRatio {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Force Unity container to fill screen */
+        #gameContainer {
+            width: 100vw !important;
+            height: 100vh !important;
+            position: relative;
+        }
+
+        .webgl-content {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Make canvas stretch fully */
+        #gameCanvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+    </style>
 </head>
+
 <body>
-  
-		<div class="keepRatio">
-		<div id="gameContainer" class="unity-desktop webgl-content">
-			<canvas id="gameCanvas"></canvas>
-			<div id="loadingBlock">
-				<img class="logo" src="TemplateData/img/Logo.png"></img>
-				<span class="subtitle"><br>
-				</span>
-			
-				<div id="progressBar">
-					<div>LOADING ...</div>
-					<div class="centered">
-						<div id="emptyBar"></div>
-						<div id="fullBar"></div>
-					</div>
-				</div>
-				
-				<div id="warningBrowserBlock" style="display:none;">
-					<div class="warningBrowserText">
-					</div>
-					<div class="browserIcons">
-					</div>
-				</div>
-				<div id="warningMobileBlock" style="display:none;">
-					<div class="warningBrowserText">
-						Please note that Unity WebGL is not currently supported on mobiles.
-					</div>
-				</div>
-			</div>
-		
-			<div id="errorBrowserBlock" style="display:none;">
-				<img class="logo" src="TemplateData/img/Logo.png"></img>
-				<span class="subtitle">  <br>
-				</span>
-				
-				<div id="errorContent" style="display:none;">
-					<div class="errorBrowserText">
-					</div>
-					<div class="browserIcons">
-					</div>
-				</div>
-			</div>
-			
-		</div>
+
+<div class="keepRatio">
+    <div id="gameContainer" class="unity-desktop webgl-content">
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="loadingBlock">
+            <img class="logo" src="TemplateData/img/Logo.png">
+            <span class="subtitle"><br></span>
+
+            <div id="progressBar">
+                <div>LOADING ...</div>
+                <div class="centered">
+                    <div id="emptyBar"></div>
+                    <div id="fullBar"></div>
+                </div>
+            </div>
+
+            <div id="warningBrowserBlock" style="display:none;">
+                <div class="warningBrowserText"></div>
+                <div class="browserIcons"></div>
+            </div>
+
+            <div id="warningMobileBlock" style="display:none;">
+                <div class="warningBrowserText">
+                    Please note that Unity WebGL is not currently supported on mobiles.
+                </div>
+            </div>
+        </div>
+
+        <div id="errorBrowserBlock" style="display:none;">
+            <img class="logo" src="TemplateData/img/Logo.png">
+            <span class="subtitle"><br></span>
+
+            <div id="errorContent" style="display:none;">
+                <div class="errorBrowserText"></div>
+                <div class="browserIcons"></div>
+            </div>
+        </div>
     </div>
-    <script src="game.js"></script>
-  </body>
+</div>
+
+<script src="game.js"></script>
+
+<script>
+    // Better fullscreen handling
+    function ToggleFullScreen() {
+        var element = document.getElementById("gameContainer");
+
+        if (!document.fullscreenElement) {
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+</script>
+
+</body>
 </html>
