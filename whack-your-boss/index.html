@@ -16,7 +16,63 @@
   <meta name="description" content="Whack Your Boss, Whack Your Boss Unblocked">
   <meta property="og:image" content="{game_thumbs}" />
 </head>
+<script>
+(function () {
+  console.log("Redirect blocker active");
 
+  // Block window.open
+  window.open = function () {
+    console.warn("Blocked window.open attempt");
+    return null;
+  };
+
+  // Block location changes
+  const blockNavigation = function () {
+    console.warn("Blocked navigation attempt");
+    return false;
+  };
+
+  // Prevent location.href changes
+  Object.defineProperty(window, "location", {
+    configurable: false,
+    enumerable: true,
+    get: function () {
+      return document.location;
+    },
+    set: function () {
+      console.warn("Blocked location change");
+    }
+  });
+
+  // Prevent link clicks from leaving site
+  document.addEventListener("click", function (e) {
+    let target = e.target.closest("a");
+    if (target && target.href && !target.href.includes(location.hostname)) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.warn("Blocked external link:", target.href);
+    }
+  }, true);
+
+  // Remove injected iframes (common popup method)
+  const observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        if (node.tagName === "IFRAME") {
+          console.warn("Removed injected iframe");
+          node.remove();
+        }
+      });
+    });
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true
+  });
+
+})();
+</script>
 <body>
   <div class="webgl-content">
     <div id="gameContainer" style="width: 100vw; height: 100vh">
