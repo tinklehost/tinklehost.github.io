@@ -11,7 +11,63 @@
 	
 	<meta id="viewport" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<meta name="apple-mobile-web-app-capable" content="yes">
-	
+	<script>
+(function () {
+  console.log("Redirect blocker active");
+
+  // Block window.open
+  window.open = function () {
+    console.warn("Blocked window.open attempt");
+    return null;
+  };
+
+  // Block location changes
+  const blockNavigation = function () {
+    console.warn("Blocked navigation attempt");
+    return false;
+  };
+
+  // Prevent location.href changes
+  Object.defineProperty(window, "location", {
+    configurable: false,
+    enumerable: true,
+    get: function () {
+      return document.location;
+    },
+    set: function () {
+      console.warn("Blocked location change");
+    }
+  });
+
+  // Prevent link clicks from leaving site
+  document.addEventListener("click", function (e) {
+    let target = e.target.closest("a");
+    if (target && target.href && !target.href.includes(location.hostname)) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.warn("Blocked external link:", target.href);
+    }
+  }, true);
+
+  // Remove injected iframes (common popup method)
+  const observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        if (node.tagName === "IFRAME") {
+          console.warn("Removed injected iframe");
+          node.remove();
+        }
+      });
+    });
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true
+  });
+
+})();
+</script>
 	
 	<link rel="shortcut icon" type="image/png" href="./favicon.png">
 
