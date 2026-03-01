@@ -12,7 +12,7 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
-            background: #1F1F20;
+            background: #000000;
         }
         
         #loading-text {
@@ -35,7 +35,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #1F1F20;
+            background: #000000;
             position: fixed;
             top: 0;
             left: 0;
@@ -43,10 +43,10 @@
         
         #unity-canvas {
             display: block;
-            background: #1F1F20;
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Change to 'cover' to fill the screen without black bars */
+            background: #000000;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: scale-down; /* This ensures the entire game is visible */
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/whatareyoutryingtodo/disable-devtool.min.js" disable-devtool-auto></script>
@@ -65,54 +65,96 @@
         const loadingText = document.querySelector("#loading-text");
         
         let unityInstance = null;
+        
+        // Force a specific aspect ratio if needed (change these values to match your game's native resolution)
+        const GAME_WIDTH = 1920;
+        const GAME_HEIGHT = 1080;
+        const GAME_ASPECT = GAME_WIDTH / GAME_HEIGHT;
+
+        function calculateScaledDimensions() {
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const windowAspect = windowWidth / windowHeight;
+            
+            let width, height;
+            
+            if (windowAspect > GAME_ASPECT) {
+                // Window is wider than game
+                height = windowHeight;
+                width = height * GAME_ASPECT;
+            } else {
+                // Window is taller than game
+                width = windowWidth;
+                height = width / GAME_ASPECT;
+            }
+            
+            return { width, height };
+        }
 
         function forceResize() {
             if (!canvas) return;
             
-            // Force a reflow
-            canvas.style.display = 'none';
-            canvas.offsetHeight; // Force reflow
-            canvas.style.display = 'block';
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
             
-            // Set exact dimensions
-            canvas.style.width = window.innerWidth + 'px';
-            canvas.style.height = window.innerHeight + 'px';
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            // Get scaled dimensions to maintain aspect ratio
+            const { width: scaledWidth, height: scaledHeight } = calculateScaledDimensions();
             
-            container.style.width = window.innerWidth + 'px';
-            container.style.height = window.innerHeight + 'px';
+            // Set container to full window
+            container.style.width = windowWidth + 'px';
+            container.style.height = windowHeight + 'px';
             
-            // If Unity instance exists, tell it to resize
+            // Set canvas to scaled dimensions (centered)
+            canvas.style.width = Math.round(scaledWidth) + 'px';
+            canvas.style.height = Math.round(scaledHeight) + 'px';
+            
+            // Set canvas resolution to match displayed size for sharp rendering
+            canvas.width = Math.round(scaledWidth * (window.devicePixelRatio || 1));
+            canvas.height = Math.round(scaledHeight * (window.devicePixelRatio || 1));
+            
+            console.log('Resized to:', scaledWidth, 'x', scaledHeight);
+            
+            // If Unity instance exists, try to update its resolution
             if (unityInstance && unityInstance.Module) {
                 try {
-                    unityInstance.SetFullscreen(0); // Ensure not in fullscreen
-                    setTimeout(() => {
-                        if (unityInstance && unityInstance.Module && unityInstance.Module.setCanvasSize) {
-                            unityInstance.Module.setCanvasSize(window.innerWidth, window.innerHeight);
-                        }
-                    }, 10);
+                    // Force Unity to use the new canvas size
+                    if (unityInstance.Module.setCanvasSize) {
+                        unityInstance.Module.setCanvasSize(canvas.width, canvas.height);
+                    }
+                    
+                    // Trigger a resize event in Unity
+                    if (unityInstance.SendMessage) {
+                        // If you have a Unity script that listens for resize events
+                        // unityInstance.SendMessage('ResizeListener', 'OnResize', canvas.width + ',' + canvas.height);
+                    }
                 } catch (e) {
-                    console.log('Resize error:', e);
+                    console.log('Unity resize error:', e);
                 }
             }
         }
 
-        // Initial setup
+        // Initialize display
         function initializeDisplay() {
             forceResize();
             
-            // Add multiple resize triggers to ensure it takes effect
+            // Multiple resize attempts to ensure it takes effect
             setTimeout(forceResize, 100);
             setTimeout(forceResize, 500);
             setTimeout(forceResize, 1000);
+            setTimeout(forceResize, 2000);
         }
 
         window.addEventListener('resize', forceResize);
         window.addEventListener('load', initializeDisplay);
+        
+        // Handle orientation changes on mobile
+        window.addEventListener('orientationchange', function() {
+            setTimeout(forceResize, 200);
+        });
+        
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
-                setTimeout(forceResize, 100);
+                setTimeout(forceResize, 200);
             }
         });
 
@@ -183,21 +225,33 @@
                 productName: "DELTATRAVELER",
                 productVersion: "3.0.12.0111",
                 matchWebGLToCanvasSize: true,
-                devicePixelRatio: window.devicePixelRatio
+                devicePixelRatio: 1 // Force devicePixelRatio to 1 to prevent Unity from auto-scaling
             }).then((instance) => {
                 unityInstance = instance;
                 loadingText.remove();
                 
-                // Force multiple resizes after Unity loads
+                // Force resize after Unity loads
                 forceResize();
-                setTimeout(forceResize, 50);
-                setTimeout(forceResize, 200);
+                setTimeout(forceResize, 100);
                 setTimeout(forceResize, 500);
                 
+                // Override Unity's internal resize if possible
+                if (instance.Module) {
+                    // Store original functions
+                    const originalSetCanvasSize = instance.Module.setCanvasSize;
+                    
+                    // Override with our own that maintains aspect ratio
+                    instance.Module.setCanvasSize = function(width, height) {
+                        const scaled = calculateScaledDimensions();
+                        if (originalSetCanvasSize) {
+                            originalSetCanvasSize.call(this, scaled.width, scaled.height);
+                        }
+                    };
+                }
+                
                 // Add click handler to force resize on any user interaction
-                canvas.addEventListener('click', function() {
-                    forceResize();
-                });
+                canvas.addEventListener('click', forceResize);
+                canvas.addEventListener('touchstart', forceResize);
                 
                 // Handle fullscreen changes
                 canvas.addEventListener('fullscreenchange', forceResize);
