@@ -20,13 +20,25 @@
             font-size: 48px; 
             font-family: cursive; 
             text-align: center; 
-            margin-top: 20px;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 10;
             width: 100%;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        #unity-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1F1F20;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
         
         #unity-canvas {
@@ -34,15 +46,7 @@
             background: #1F1F20;
             width: 100%;
             height: 100%;
-            object-fit: contain; /* This ensures the game maintains aspect ratio */
-        }
-        
-        #unity-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            object-fit: cover; /* Change to 'cover' to fill the screen without black bars */
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/whatareyoutryingtodo/disable-devtool.min.js" disable-devtool-auto></script>
@@ -59,30 +63,58 @@
         const canvas = document.querySelector("#unity-canvas");
         const container = document.querySelector("#unity-container");
         const loadingText = document.querySelector("#loading-text");
+        
+        let unityInstance = null;
 
-        function resizeCanvas() {
-            // Get the actual available space
-            const windowWidth = window.innerWidth;
-            const windowHeight = window.innerHeight;
+        function forceResize() {
+            if (!canvas) return;
             
-            // Set canvas size to match container
-            canvas.style.width = windowWidth + "px";
-            canvas.style.height = windowHeight + "px";
+            // Force a reflow
+            canvas.style.display = 'none';
+            canvas.offsetHeight; // Force reflow
+            canvas.style.display = 'block';
             
-            // Set canvas resolution for crisp rendering
-            canvas.width = windowWidth;
-            canvas.height = windowHeight;
+            // Set exact dimensions
+            canvas.style.width = window.innerWidth + 'px';
+            canvas.style.height = window.innerHeight + 'px';
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
             
-            // Update container size
-            container.style.width = windowWidth + "px";
-            container.style.height = windowHeight + "px";
+            container.style.width = window.innerWidth + 'px';
+            container.style.height = window.innerHeight + 'px';
+            
+            // If Unity instance exists, tell it to resize
+            if (unityInstance && unityInstance.Module) {
+                try {
+                    unityInstance.SetFullscreen(0); // Ensure not in fullscreen
+                    setTimeout(() => {
+                        if (unityInstance && unityInstance.Module && unityInstance.Module.setCanvasSize) {
+                            unityInstance.Module.setCanvasSize(window.innerWidth, window.innerHeight);
+                        }
+                    }, 10);
+                } catch (e) {
+                    console.log('Resize error:', e);
+                }
+            }
         }
 
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('load', resizeCanvas);
-        
-        // Initial resize
-        resizeCanvas();
+        // Initial setup
+        function initializeDisplay() {
+            forceResize();
+            
+            // Add multiple resize triggers to ensure it takes effect
+            setTimeout(forceResize, 100);
+            setTimeout(forceResize, 500);
+            setTimeout(forceResize, 1000);
+        }
+
+        window.addEventListener('resize', forceResize);
+        window.addEventListener('load', initializeDisplay);
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                setTimeout(forceResize, 100);
+            }
+        });
 
         let totalBytes = 256389429;
         let loadedBytes = 0;
@@ -92,13 +124,6 @@
             if (bytes > 1024*1024) return (bytes / (1024*1024)).toFixed(2) + " MB";
             if (bytes > 1024) return (bytes / 1024).toFixed(2) + " KB";
             return bytes + " B";
-        }
-
-        async function getSize(url) {
-            try {
-                const res = await fetch(url, { method: "HEAD" });
-                return parseInt(res.headers.get("Content-Length") || "0", 10);
-            } catch { return 0; }
         }
 
         async function fetchWithProgress(url) {
@@ -137,6 +162,9 @@
         }
 
         (async () => {
+            // Set initial canvas size
+            initializeDisplay();
+            
             const dataParts = getParts("Build/DELTAWEBGL.data.unityweb", 9);
             const wasmParts = getParts("Build/DELTAWEBGL.wasm.unityweb", 5);
             const [dataUrl, wasmUrl] = await Promise.all([
@@ -144,6 +172,7 @@
                 mergeFiles(wasmParts)
             ]);
 
+            // Create Unity instance with proper configuration
             createUnityInstance(canvas, {
                 arguments: [],
                 dataUrl: dataUrl,
@@ -153,15 +182,26 @@
                 companyName: "RynoGG",
                 productName: "DELTATRAVELER",
                 productVersion: "3.0.12.0111",
-                matchWebGLToCanvasSize: true, // This is key for proper scaling
-                devicePixelRatio: window.devicePixelRatio // Maintain sharpness on high DPI screens
-            }).then((unityInstance) => {
+                matchWebGLToCanvasSize: true,
+                devicePixelRatio: window.devicePixelRatio
+            }).then((instance) => {
+                unityInstance = instance;
                 loadingText.remove();
-                // Force another resize after Unity loads
-                resizeCanvas();
                 
-                // Optional: Handle fullscreen properly
-                canvas.addEventListener('fullscreenchange', resizeCanvas);
+                // Force multiple resizes after Unity loads
+                forceResize();
+                setTimeout(forceResize, 50);
+                setTimeout(forceResize, 200);
+                setTimeout(forceResize, 500);
+                
+                // Add click handler to force resize on any user interaction
+                canvas.addEventListener('click', function() {
+                    forceResize();
+                });
+                
+                // Handle fullscreen changes
+                canvas.addEventListener('fullscreenchange', forceResize);
+                document.addEventListener('fullscreenchange', forceResize);
             });
         })();
     </script>
