@@ -26,6 +26,29 @@ NORD.initGameDefinitions = function () {
   NORD.definitionsManager.appVersion = "1.0"; // NORD.definitionsManager.colorYellow = 0xC2C200;
 
   NORD.definitionsManager.colorYellow = 0xded704;
+  NORD.definitionsManager.avaiableDomains = [
+    "localhost",
+    "z-var.ru",
+    "coolmath-games.com",
+    "coolmathgames.com",
+    "edit.coolmath-games.com",
+    "stage.coolmath-games.com",
+    "edit-stage.coolmath-games.com",
+    "dev.coolmath-games.com",
+    "m.coolmath-games.com",
+    "coolmathgames.com",
+    "coolmathgames.com",
+    "edit.coolmathgames.com",
+    "stage.coolmathgames.com",
+    "edit-stage.coolmathgames.com",
+    "dev.coolmathgames.com",
+    "m.coolmathgames.com",
+    "edit.coolmathgames.com", 
+    "www.coolmathgames.com",
+    "edit.coolmathgames.com",
+    "stage.coolmathgames.com",
+    "stage-edit.coolmathgames.com"
+  ];
   NORD.definitionsManager.assetsGroupBoot = new AssetsGroup("boot", [
     {
       name: "preloader_bar_border",
@@ -372,17 +395,15 @@ NORD.App.prototype.init = function () {
     NORD.definitionsManager.appSize.heightMax
   );
 
-  console.log(
-    "App[" +
-      this.name +
-      "], version: " +
-      this.version +
-      ", platform: " +
-      this.platform
-  );
+  console.log("App[" +this.name +"], version: " +this.version +", platform: " +this.platform);
 };
 
 NORD.App.prototype.boot = function () {
+  /* if (
+    NORD.definitionsManager.avaiableDomains.length &&
+    !Util.isDomainAvaiable(NORD.definitionsManager.avaiableDomains)
+  )
+    return; */
   var self = this;
   NORD.definitionsManager.assetsGroupBoot.once("loading_complete", function () {
     self.emit("boot_loaded");
@@ -432,6 +453,9 @@ var shift = 0;
 
 NORD.App.prototype.loop = function (time) {
   requestAnimationFrame(NORD.app.loop); // Emulate low FPS
+
+  if (isAdBreakActive) return;
+
   // setTimeout(() => {
   //   NORD.app.loop(Date.now());
   // }, (1000 / 1000 / 20) * 1000);
@@ -482,9 +506,9 @@ NORD.App.prototype.apiCallback = function (name, data) {
     else if (data == "exit") statistics += "3";
     statistics += NORD.game.config.gamesCount; // console.log('Statistics: ', statistics);
 
-    if (parent && parent.cmgGameEvent) {
+    /* if (parent && parent.cmgGameEvent) {
       parent.cmgDataEvent("data", statistics);
-    }
+    } */
 
     return;
   }
@@ -518,18 +542,18 @@ NORD.App.prototype.apiCallback = function (name, data) {
     if (data.win == "computer") _statistics += "2";
     else _statistics += "1"; // console.log('StatisticsPoint: ', data, statistics);
 
-    if (parent && parent.cmgGameEvent) {
+    /* if (parent && parent.cmgGameEvent) {
       parent.cmgDataEvent("data", _statistics);
-    }
+    } */
 
     return;
   }
 
-  if (parent && parent.cmgGameEvent) {
+  /* if (parent && parent.cmgGameEvent) {
     // console.log('cmgEvent: ' + name + ',', data);
     if (data != null && data != undefined) parent.cmgGameEvent(name, data);
     else parent.cmgGameEvent(name);
-  }
+  } */
 }; // var fixedTimeStep = 1 / 60, maxSubSteps = 10, lastTimeMilliseconds;
 // requestAnimationFrame(function animloop(timeMilliseconds){
 //     requestAnimationFrame(animloop);

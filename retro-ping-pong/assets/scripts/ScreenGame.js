@@ -354,6 +354,8 @@ NORD.PanelEndGame = function (config) {
   this.buttonHome.on(
     "button_click",
     function (data) {
+      showAd();
+      
       var _this3 = this;
 
       if (this.state !== "show") return;
@@ -393,6 +395,8 @@ NORD.PanelEndGame = function (config) {
   this.buttonRestart.on(
     "button_click",
     function (data) {
+      showAd();
+
       var _this4 = this;
 
       if (this.state !== "show") return;

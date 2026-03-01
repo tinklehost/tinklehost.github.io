@@ -347,6 +347,7 @@ NORD.AudioManager.prototype.playAudio = function (name) {
 //==========================================================================================================================================//
 
 NORD.DefinitionsManager = function () {
+  this.avaiableDomains = [];
   this.assetsGroupBoot = null;
   this.assetsGroupMain = null;
 }; //==========================================================================================================================================//

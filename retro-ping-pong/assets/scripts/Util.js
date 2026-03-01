@@ -274,6 +274,27 @@ Util.isMobile = function () {
   }
 };
 
+Util.isDomainAvaiable = function (avaiableDomains) {
+  var isPlayAvaiable = false;
+  var domain = document.domain;
+
+  for (var i = 0; i < avaiableDomains.length; i++) {
+    if (domain.indexOf(avaiableDomains[i]) != -1) {
+      isPlayAvaiable = true;
+      break;
+    }
+  }
+
+  return isPlayAvaiable;
+};
+
+Util.coolmathApiCallback = function (name, data) {
+  /* if (parent && parent.cmgGameEvent) {
+    // console.log('cmgEvent: ' + name + ',', data);
+    if (data != null && data != undefined) parent.cmgGameEvent(name, data);
+    else parent.cmgGameEvent(name);
+  } */
+};
 
 function bind(func, context) {
   return function () {
