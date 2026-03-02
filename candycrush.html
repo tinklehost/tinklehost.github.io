@@ -18,9 +18,20 @@
 <meta name="supports-ad-play-button" content="true" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tinklehost/hosting@main/candycrush/css/stylesheet.css" type="text/css" charset="utf-8" />
 <script src="https://cdn.jsdelivr.net/gh/tinklehost/hosting@main/candycrush/js/custom-phaser.min.js"></script>
-	<script>
+<script>
 Phaser.Loader.prototype.crossOrigin = 'anonymous';
+
+(function() {
+    const OriginalImage = window.Image;
+    window.Image = function(w, h) {
+        const img = new OriginalImage(w, h);
+        img.crossOrigin = "anonymous";
+        return img;
+    };
+    window.Image.prototype = OriginalImage.prototype;
+})();
 </script>
+
 <script src="https://cdn.jsdelivr.net/gh/tinklehost/hosting@main/candycrush/js/game.min.js"></script>
 
   <style>
