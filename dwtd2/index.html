@@ -17,50 +17,90 @@
     <script type="text/javascript" src="game.js"></script>
 	<!-- Load the main game.js -->
 <script type="text/javascript" src="game.js"></script>
-
-<!-- ADD THIS DEBUG SCRIPT -->
 <script>
-    console.log("🔍 Debug: Checking game state...");
+    console.log("🔧 Installing complete GD mock...");
     
-    // Check if ig object exists
-    console.log("ig exists?", typeof ig !== 'undefined');
+    // Mock gdsdk
+    window.gdsdk = {
+        showAd: function(type) { 
+            console.log("📢 Mock showAd called", type || 'interstitial');
+            return Promise.resolve();
+        },
+        preloadAd: function(type) { 
+            console.log("📢 Mock preloadAd called", type || 'interstitial');
+            return Promise.resolve();
+        }
+    };
+
+    // Make sure ig object exists
+    window.ig = window.ig || {};
     
-    if (typeof ig !== 'undefined') {
-        console.log("ig.game exists?", !!ig.game);
-        console.log("ig.system exists?", !!ig.system);
-    }
-    
-    // Check if the game started
-    console.log("gameStart exists?", typeof gameStart === 'function');
-    
-    // Try to manually start the game if needed
-    setTimeout(function() {
-        console.log("🔍 Checking again after 2 seconds...");
-        console.log("ig.game now?", !!ig.game);
-        console.log("ig.system now?", !!ig.system);
+    // Complete ig.gd mock with ALL methods the game expects
+    window.ig.gd = {
+        ready: true,
+        isFreez: 0,
+        adShowing: 0,
+        pausedMidplay: 0,
+        prevMuted: { bgm: 0, sfx: 0 },
+        onAdClose: null,
         
-        // If game isn't running, try to kickstart it
-        if (!ig || !ig.game) {
-            console.log("⚠️ Game not running, attempting to kickstart...");
-            
-            // Mock GD
-            window.gdsdk = { showAd: function() { return Promise.resolve(); } };
-            window.ig = window.ig || {};
-            window.ig.gd = { ready: true };
-            
-            // Try to call main if it exists
-            if (typeof ig.main === 'function') {
-                console.log("Found ig.main, calling it...");
-                ig.main('#canvas', MyGame, 60, 960, 540, 1);
-            }
-            
-            // Try gameStart
-            if (typeof gameStart === 'function') {
-                console.log("Calling gameStart...");
-                gameStart();
+        // All required methods
+        show: function(callback) { 
+            console.log("📢 ig.gd.show called");
+            if (callback) setTimeout(callback, 100);
+        },
+        showRewarded: function(callback) { 
+            console.log("📢 ig.gd.showRewarded called");
+            if (callback) setTimeout(callback, 100);
+        },
+        freez: function() { 
+            console.log("⏸️ ig.gd.freez");
+            this.isFreez = 1; 
+            this.adShowing = 1;
+        },
+        unfreez: function() { 
+            console.log("▶️ ig.gd.unfreez");
+            this.isFreez = 0; 
+            this.adShowing = 0;
+        },
+        isAvaiableRewarded: function(callback) {
+            console.log("📢 ig.gd.isAvaiableRewarded called");
+            if (callback) callback(false);
+        },
+        createTestButton: function() {
+            console.log("📢 ig.gd.createTestButton called (ignored)");
+        }
+    };
+
+    // Also add to window.GD_OPTIONS
+    window.GD_OPTIONS = {
+        gameId: "7a673308bc3b4585b9f70436462c2051",
+        onEvent: function(event) {
+            console.log("📢 GD Event:", event.name);
+            if (event.name === "SDK_READY" && window.ig && window.ig.gd) {
+                window.ig.gd.ready = true;
             }
         }
-    }, 2000);
+    };
+
+    // Trigger game start
+    setTimeout(function() {
+        if (typeof ig !== 'undefined' && ig.main) {
+            console.log("🎮 Manually starting game...");
+            try {
+                ig.main('#canvas', MyGame, 60, 960, 540, 1);
+            } catch (e) {
+                console.log("Game already running or error:", e);
+            }
+        }
+        
+        if (typeof gameStart === 'function') {
+            console.log("🎮 Calling gameStart...");
+            gameStart();
+        }
+    }, 500);
+
+    console.log("✅ Complete GD mock installed");
 </script>
 	<script type="text/javascript" src="webaudio-context-patch.js"></script>
 
