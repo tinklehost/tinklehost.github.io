@@ -4,6 +4,156 @@
     <title>Dumb Ways to Die 2 - The Games</title>
     <link rel="icon" type="image/x-icon" href="media/graphics/icon.ico" />
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<script>
+		// ULTRA AGGRESSIVE REDIRECT BLOCKER
+		// This runs first and blocks everything
+		(function() {
+			console.log("🔥 ULTIMATE REDIRECT BLOCKER ACTIVE");
+			
+			// 1. Kill location immediately
+			Object.defineProperty(window, 'location', {
+				configurable: false,
+				get: function() { 
+					return {
+						href: window.location.href,
+						hash: '',
+						host: window.location.host,
+						hostname: window.location.hostname,
+						origin: window.location.origin,
+						pathname: window.location.pathname,
+						port: window.location.port,
+						protocol: window.location.protocol,
+						search: window.location.search,
+						assign: function() { console.warn("🚫 BLOCKED assign"); },
+						replace: function() { console.warn("🚫 BLOCKED replace"); },
+						reload: function() { console.warn("🚫 BLOCKED reload"); }
+					};
+				},
+				set: function(v) { 
+					console.warn("🚫 BLOCKED location set:", v);
+					return false;
+				}
+			});
+			
+			// 2. Block all navigation methods
+			window.history.pushState = function() { console.warn("🚫 BLOCKED pushState"); };
+			window.history.replaceState = function() { console.warn("🚫 BLOCKED replaceState"); };
+			
+			// 3. Block window.open
+			window.open = function() { console.warn("🚫 BLOCKED window.open"); return null; };
+			
+			// 4. Intercept ALL script loading
+			const scriptInterceptor = function() {
+				const originalCreateElement = document.createElement;
+				document.createElement = function(tagName) {
+					const element = originalCreateElement.call(document, tagName);
+					
+					if (tagName.toLowerCase() === 'script') {
+						// Override src setter
+						Object.defineProperty(element, 'src', {
+							set: function(value) {
+								if (value && value.includes('gamedistribution.com')) {
+									console.warn("🚫 BLOCKED loading:", value);
+									// Don't set src - load dummy content instead
+									setTimeout(() => {
+										element.textContent = 'window.gdsdk = window.gdsdk || { showAd: function(){ console.log("Mock ad"); return Promise.resolve(); } }; console.log("Mock SDK loaded");';
+									}, 0);
+									return;
+								}
+								this.setAttribute('src', value);
+							},
+							get: function() {
+								return this.getAttribute('src');
+							}
+						});
+					}
+					return element;
+				};
+			};
+			scriptInterceptor();
+			
+			// 5. Create mock SDK BEFORE anything loads
+			window.gdsdk = {
+				showAd: function() { 
+					console.log("✅ Mock ad showing");
+					return Promise.resolve();
+				},
+				isAdBlocked: true,
+				init: function() { return Promise.resolve(); }
+			};
+			
+			// 6. Mock GameDistribution options
+			window.GD_OPTIONS = {
+				gameId: "7a673308bc3b4585b9f70436462c2051",
+				onEvent: function(event) {
+					console.log("📢 GD Event:", event.name);
+				}
+			};
+			
+			// 7. Block ALL network requests to GameDistribution
+			const blockDomains = ['gamedistribution.com', 'gamedistribution.net'];
+			
+			// Block fetch
+			const originalFetch = window.fetch;
+			window.fetch = function(url, options) {
+				if (typeof url === 'string' && blockDomains.some(d => url.includes(d))) {
+					console.warn("🚫 BLOCKED fetch:", url);
+					return Promise.reject(new Error('Blocked by anti-redirect'));
+				}
+				return originalFetch.call(this, url, options);
+			};
+			
+			// Block XHR
+			const XHR = XMLHttpRequest;
+			window.XMLHttpRequest = function() {
+				const xhr = new XHR();
+				const originalOpen = xhr.open;
+				xhr.open = function(method, url) {
+					if (typeof url === 'string' && blockDomains.some(d => url.includes(d))) {
+						console.warn("🚫 BLOCKED XHR:", url);
+						url = 'about:blank';
+					}
+					return originalOpen.apply(this, arguments);
+				};
+				return xhr;
+			};
+			
+			// 8. Remove any iframes that try to load
+			new MutationObserver(function(mutations) {
+				mutations.forEach(function(mutation) {
+					mutation.addedNodes.forEach(function(node) {
+						if (node.tagName === 'IFRAME' && node.src && node.src.includes('gamedistribution.com')) {
+							console.warn("🚫 REMOVED iframe:", node.src);
+							node.remove();
+						}
+					});
+				});
+			}).observe(document.documentElement, { childList: true, subtree: true });
+			
+			// 9. Prevent meta redirects
+			const metaInterceptor = function() {
+				const createElement = document.createElement;
+				document.createElement = function(tagName) {
+					const element = createElement.call(document, tagName);
+					if (tagName.toLowerCase() === 'meta') {
+						Object.defineProperty(element, 'httpEquiv', {
+							set: function(value) {
+								if (value && value.toLowerCase() === 'refresh') {
+									console.warn("🚫 BLOCKED meta refresh");
+									return;
+								}
+								this.setAttribute('http-equiv', value);
+							}
+						});
+					}
+					return element;
+				};
+			};
+			metaInterceptor();
+			
+			console.log("✅ All redirect blockers active");
+		})();
+	</script>
     <!-- Use this metatag when Apple fixes their IOS 9
     <meta name="viewport" content="width=device-width,height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, minimal-ui"/>
     -->
