@@ -15,36 +15,52 @@
 
     <link rel="stylesheet" type="text/css" href="game.css">
     <script type="text/javascript" src="game.js"></script>
-	<script>
-    // Mock GD object to make the game think everything is ready
-    window.gdsdk = {
-        showAd: function() { 
-            console.log("Mock ad shown");
-            return Promise.resolve();
-        },
-        preloadAd: function() { 
-            return Promise.resolve();
-        }
-    };
+	<!-- Load the main game.js -->
+<script type="text/javascript" src="game.js"></script>
 
-    // Make sure ig object exists and has gd
-    window.ig = window.ig || {};
-    window.ig.gd = {
-        ready: true,
-        isFreez: 0,
-        adShowing: 0,
-        show: function(callback) { if (callback) callback(); },
-        showRewarded: function(callback) { if (callback) callback(); },
-        unfreez: function() { this.isFreez = 0; },
-        freez: function() { this.isFreez = 1; }
-    };
-
-    // Trigger game start if needed
-    if (typeof window.gameStart === 'function') {
-        window.gameStart();
+<!-- ADD THIS DEBUG SCRIPT -->
+<script>
+    console.log("🔍 Debug: Checking game state...");
+    
+    // Check if ig object exists
+    console.log("ig exists?", typeof ig !== 'undefined');
+    
+    if (typeof ig !== 'undefined') {
+        console.log("ig.game exists?", !!ig.game);
+        console.log("ig.system exists?", !!ig.system);
     }
     
-    console.log("✅ Mock GD injected");
+    // Check if the game started
+    console.log("gameStart exists?", typeof gameStart === 'function');
+    
+    // Try to manually start the game if needed
+    setTimeout(function() {
+        console.log("🔍 Checking again after 2 seconds...");
+        console.log("ig.game now?", !!ig.game);
+        console.log("ig.system now?", !!ig.system);
+        
+        // If game isn't running, try to kickstart it
+        if (!ig || !ig.game) {
+            console.log("⚠️ Game not running, attempting to kickstart...");
+            
+            // Mock GD
+            window.gdsdk = { showAd: function() { return Promise.resolve(); } };
+            window.ig = window.ig || {};
+            window.ig.gd = { ready: true };
+            
+            // Try to call main if it exists
+            if (typeof ig.main === 'function') {
+                console.log("Found ig.main, calling it...");
+                ig.main('#canvas', MyGame, 60, 960, 540, 1);
+            }
+            
+            // Try gameStart
+            if (typeof gameStart === 'function') {
+                console.log("Calling gameStart...");
+                gameStart();
+            }
+        }
+    }, 2000);
 </script>
 	<script type="text/javascript" src="webaudio-context-patch.js"></script>
 
