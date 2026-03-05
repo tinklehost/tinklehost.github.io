@@ -4,262 +4,25 @@
     <title>Dumb Ways to Die 2 - The Games</title>
     <link rel="icon" type="image/x-icon" href="media/graphics/icon.ico" />
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-    
-    <!-- THIS MUST BE THE VERY FIRST SCRIPT - NO EXCEPTIONS -->
-    <script>
-        // ULTIMATE GAMEDISTRIBUTION KILLER - RUNS BEFORE ANYTHING
-        (function() {
-            console.log("🔥 GD KILLER ACTIVE");
-            
-            // 1. COMPLETELY FREEZE LOCATION - MAKE IT IMMUTABLE
-            const originalLocation = window.location;
-            const fakeLocation = {
-                href: originalLocation.href,
-                protocol: originalLocation.protocol,
-                host: originalLocation.host,
-                hostname: originalLocation.hostname,
-                port: originalLocation.port,
-                pathname: originalLocation.pathname,
-                search: originalLocation.search,
-                hash: originalLocation.hash,
-                origin: originalLocation.origin,
-                
-                assign: function() { console.warn("🚫 BLOCKED assign"); return false; },
-                replace: function() { console.warn("🚫 BLOCKED replace"); return false; },
-                reload: function() { console.warn("🚫 BLOCKED reload"); return false; }
-            };
-            
-            // Override location with a property that can't be changed
-            Object.defineProperty(window, 'location', {
-                configurable: false,
-                enumerable: true,
-                get: function() { return fakeLocation; },
-                set: function(v) { 
-                    console.warn("🚫 BLOCKED location set to:", v);
-                    return false;
-                }
-            });
-            
-            // 2. KILL ALL REDIRECT METHODS
-            window.open = function() { console.warn("🚫 BLOCKED open"); return null; };
-            window.top.location = fakeLocation;
-            window.parent.location = fakeLocation;
-            
-            // Override history methods
-            window.history.pushState = function() { console.warn("🚫 BLOCKED pushState"); };
-            window.history.replaceState = function() { console.warn("🚫 BLOCKED replaceState"); };
-            
-            // 3. PREEMPTIVELY CREATE MOCK GD OBJECTS
-            window.gdsdk = {
-                showAd: function() { 
-                    console.log("✅ Mock ad shown");
-                    return Promise.resolve({});
-                },
-                preloadAd: function() { 
-                    console.log("✅ Mock ad preloaded");
-                    return Promise.resolve({});
-                },
-                isAdBlocked: true,
-                gameId: "7a673308bc3b4585b9f70436462c2051",
-                version: "1.0.0",
-                sdk: { ready: true }
-            };
-            
-            window.GD_OPTIONS = {
-                gameId: "7a673308bc3b4585b9f70436462c2051",
-                onEvent: function(event) {
-                    console.log("📢 GD Event:", event.name);
-                    if (event.name === "SDK_READY" && typeof window.gameStart === 'function') {
-                        window.gameStart();
-                    }
-                }
-            };
-            
-            // 4. INTERCEPT AND BLOCK ALL GD SCRIPT LOADS
-            const originalCreateElement = document.createElement;
-            document.createElement = function(tagName) {
-                const element = originalCreateElement.call(document, tagName);
-                
-                if (tagName.toLowerCase() === 'script') {
-                    // Override src property
-                    Object.defineProperty(element, 'src', {
-                        set: function(value) {
-                            if (value && value.includes('gamedistribution.com')) {
-                                console.warn("🚫 BLOCKED loading GD script:", value);
-                                // Load empty script instead
-                                setTimeout(() => {
-                                    element.textContent = 'console.log("✅ GD mock active"); window.gdsdk = window.gdsdk || {};';
-                                }, 0);
-                                return;
-                            }
-                            this.setAttribute('src', value);
-                        },
-                        get: function() { return this.getAttribute('src'); }
-                    });
-                }
-                
-                if (tagName.toLowerCase() === 'iframe') {
-                    // Block iframes too
-                    Object.defineProperty(element, 'src', {
-                        set: function(value) {
-                            if (value && value.includes('gamedistribution.com')) {
-                                console.warn("🚫 BLOCKED iframe:", value);
-                                return;
-                            }
-                            this.setAttribute('src', value);
-                        },
-                        get: function() { return this.getAttribute('src'); }
-                    });
-                }
-                
-                return element;
-            };
-            
-            // 5. BLOCK ALL NETWORK REQUESTS TO GD
-            const blockedDomains = ['gamedistribution.com', 'gamedistribution.net'];
-            
-            // Block fetch
-            const originalFetch = window.fetch;
-            window.fetch = function(url, options) {
-                if (typeof url === 'string' && blockedDomains.some(d => url.includes(d))) {
-                    console.warn("🚫 BLOCKED fetch to:", url);
-                    return Promise.reject(new Error('Blocked by GD Killer'));
-                }
-                return originalFetch.call(this, url, options);
-            };
-            
-            // Block XHR
-            const XHR = XMLHttpRequest;
-            window.XMLHttpRequest = function() {
-                const xhr = new XHR();
-                const originalOpen = xhr.open;
-                xhr.open = function(method, url) {
-                    if (typeof url === 'string' && blockedDomains.some(d => url.includes(d))) {
-                        console.warn("🚫 BLOCKED XHR to:", url);
-                        // Return mock response
-                        setTimeout(() => {
-                            if (xhr.onload) {
-                                xhr.status = 200;
-                                xhr.responseText = '{}';
-                                xhr.onload();
-                            }
-                        }, 10);
-                        return;
-                    }
-                    return originalOpen.apply(this, arguments);
-                };
-                return xhr;
-            };
-            
-            // 6. REMOVE ANY GD ELEMENTS THAT SLIP THROUGH
-            new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    mutation.addedNodes.forEach(function(node) {
-                        if (node.tagName === 'SCRIPT' && node.src && node.src.includes('gamedistribution.com')) {
-                            console.warn("🚫 REMOVED GD script:", node.src);
-                            node.remove();
-                        }
-                        if (node.tagName === 'IFRAME' && node.src && node.src.includes('gamedistribution.com')) {
-                            console.warn("🚫 REMOVED GD iframe:", node.src);
-                            node.remove();
-                        }
-                    });
-                });
-            }).observe(document.documentElement, { childList: true, subtree: true });
-            
-            // 7. PREVENT META REFRESH
-            const metaCreate = document.createElement;
-            document.createElement = function(tagName) {
-                const element = metaCreate.call(document, tagName);
-                if (tagName.toLowerCase() === 'meta') {
-                    Object.defineProperty(element, 'httpEquiv', {
-                        set: function(value) {
-                            if (value && value.toLowerCase() === 'refresh') {
-                                console.warn("🚫 BLOCKED meta refresh");
-                                return;
-                            }
-                            this.setAttribute('http-equiv', value);
-                        },
-                        get: function() { return this.getAttribute('http-equiv'); }
-                    });
-                }
-                return element;
-            };
-            
-            console.log("✅ GD Killer active - all redirects blocked");
-        })();
-    </script>
-    
-    <!-- Rest of your meta tags -->
-    <meta name="viewport" content="initial-scale=1.0001, minimum-scale=1.0001, maximum-scale=1.0001, user-scalable=no, minimal-ui"/>
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    
-    <link rel="stylesheet" type="text/css" href="game.css">
-    
-    <!-- Load scripts in correct order -->
-    <script>
-        // Define game variables BEFORE loading game.js
-        let isAdBreakActive = false;
-        let wasMuted = false;
-        
-        window["GD_OPTIONS"] = {
-            "gameId": "7a673308bc3b4585b9f70436462c2051",
-            "onEvent": function(event) {
-                console.log("📢 Local GD Event:", event.name);
-                switch (event.name) {
-                    case "SDK_GAME_START":
-                        isAdBreakActive = false;
-                        try {
-                            if (typeof NORD !== 'undefined' && NORD.audioManager) {
-                                NORD.audioManager.setMute(wasMuted);
-                            }
-                            if (typeof TweenMax !== 'undefined') {
-                                TweenMax.resumeAll();
-                            }
-                        } catch (e) {}
-                        break;
-                    case "SDK_GAME_PAUSE":
-                        isAdBreakActive = true;
-                        try {
-                            if (typeof NORD !== 'undefined' && NORD.audioManager) {
-                                wasMuted = NORD.audioManager.isMute;
-                                NORD.audioManager.setMute(true);
-                            }
-                            if (typeof TweenMax !== 'undefined') {
-                                TweenMax.pauseAll();
-                            }
-                        } catch (e) {}
-                        break;
-                }
-            }
-        };
-        
-        function showAd() {
-            console.log('📢 showAd called - simulating locally');
-            setTimeout(() => {
-                try {
-                    if (typeof NORD !== 'undefined' && NORD.audioManager) {
-                        NORD.audioManager.setMute(wasMuted);
-                    }
-                    if (typeof TweenMax !== 'undefined') {
-                        TweenMax.resumeAll();
-                    }
-                    isAdBreakActive = false;
-                    console.log("✅ Simulated ad complete");
-                } catch (e) {}
-            }, 500);
-            return Promise.resolve();
-        }
-    </script>
-    
-    <!-- Load the main game.js (your obfuscated file) -->
-    <script type="text/javascript" src="game.js"></script>
-    <script type="text/javascript" src="webaudio-context-patch.js"></script>
+    <!-- Use this metatag when Apple fixes their IOS 9
+    <meta name="viewport" content="width=device-width,height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, minimal-ui"/>
+    -->
 
-    <!-- AnalyticsCode -->
-    <!-- APICode -->
+    <!--Temporary fix for IOS 9-->
+    <meta name="viewport" content="initial-scale=1.0001, minimum-scale=1.0001, maximum-scale=1.0001, user-scalable=no, minimal-ui"/>
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <link rel="stylesheet" type="text/css" href="game.css">
+    <script type="text/javascript" src="game.js"></script>
+	<script type="text/javascript" src="webaudio-context-patch.js"></script>
+
+<!-- AnalyticsCode -->
+
+<!-- APICode -->
 </head>
 <body onload="setTimeout(function(){window.scrollTo(0,1)},1);">
+<!--body-->
     <div id="preloadText" style="font-family:cooperbt-medium">.</div>
     <div id="preloadText" style="font-family:cooper-bold">.</div>
     <div id="ajaxbar">
@@ -267,103 +30,122 @@
 
         <div id="orientate"><img src="media/graphics/orientate/portrait.png" /></div>
         <div id="play" class="play" onclick=""><img src="media/graphics/splash/mobile/cover-start.jpg" /></div>
+        <!--<img id="scrollDown" width="220" height="277"></img>-->
 
-        <!-- All your ad divs remain the same -->
+        <!-- SECTION GENERATED BY CODE -->
         <div id="MobileAdInGamePreroll">
             <div id="MobileAdInGamePreroll-Box">
                 <div id="MobileAdInGamePreroll-Box-Header"></div>
                 <a id="MobileAdInGamePreroll-Box-Close" onclick="MobileAdInGamePreroll.Close();"></a>
                 <div id="MobileAdInGamePreroll-Box-Body">
-                    <center></center>
+                    <center>
+<!-- MobileAdInGamePreroll -->
+<!-- AdTest-MobileAdInGamePreroll -->
+<!-- EndOfAdTest-MobileAdInGamePreroll -->
+                    </center>
                 </div>
                 <div id='MobileAdInGamePreroll-Box-Footer'></div>
             </div>
         </div>
 
+        <!-- SECOND AD (ROTATION) -->
         <div id="MobileAdInGamePreroll2">
             <div id="MobileAdInGamePreroll2-Box">
                 <div id="MobileAdInGamePreroll2-Box-Header"></div>
                 <a id="MobileAdInGamePreroll2-Box-Close" onclick="MobileAdInGamePreroll.Close();"></a>
                 <div id="MobileAdInGamePreroll2-Box-Body">
-                    <center></center>
+                    <center>
+<!-- MobileAdInGamePreroll2 -->
+                    </center>
                 </div>
                 <div id='MobileAdInGamePreroll2-Box-Footer'></div>
             </div>
         </div>
 
+        <!-- THIRD AD (ROTATION) -->
         <div id="MobileAdInGamePreroll3">
             <div id="MobileAdInGamePreroll3-Box">
                 <div id="MobileAdInGamePreroll3-Box-Header"></div>
                 <a id="MobileAdInGamePreroll3-Box-Close" onclick="MobileAdInGamePreroll.Close();"></a>
                 <div id="MobileAdInGamePreroll3-Box-Body">
-                    <center></center>
+                    <center>
+<!-- MobileAdInGamePreroll3 -->
+                    </center>
                 </div>
                 <div id='MobileAdInGamePreroll3-Box-Footer'></div>
             </div>
         </div>
 
-        <div id="MobileAdInGameHeader"></div>
-        <div id="MobileAdInGameHeader2"></div>
-        <div id="MobileAdInGameHeader3"></div>
+        <div id="MobileAdInGameHeader">
+<!-- MobileAdInGameHeader -->
+        </div>
+        <div id="MobileAdInGameHeader2">
+<!-- MobileAdInGameHeader2 -->
+        </div>
+        <div id="MobileAdInGameHeader3">
+<!-- MobileAdInGameHeader3 -->
+        </div>
 
-        <div id="MobileAdInGameFooter"></div>
-        <div id="MobileAdInGameFooter2"></div>
-        <div id="MobileAdInGameFooter3"></div>
+        <div id="MobileAdInGameFooter">
+<!-- MobileAdInGameFooter -->
+        </div>
+        <div id="MobileAdInGameFooter2">
+<!-- MobileAdInGameFooter2 -->
+        </div>
+        <div id="MobileAdInGameFooter3">
+<!-- MobileAdInGameFooter3 -->
+        </div>
+
 
         <div id="MobileAdInGameEnd">
             <div id="MobileAdInGameEnd-Box">
                 <div id="MobileAdInGameEnd-Box-Header"></div>
                 <a id="MobileAdInGameEnd-Box-Close" onclick="MobileAdInGameEnd.Close();"></a>
                 <div id="MobileAdInGameEnd-Box-Body">
-                    <center></center>
+                    <center>
+<!-- MobileAdInGameEnd -->
+                    </center>
                 </div>
                 <div id='MobileAdInGameEnd-Box-Footer'></div>
             </div>
         </div>
 
+        <!-- SECOND AD (ROTATION) -->
         <div id="MobileAdInGameEnd2">
             <div id="MobileAdInGameEnd2-Box">
                 <div id="MobileAdInGameEnd2-Box-Header"></div>
                 <a id="MobileAdInGameEnd2-Box-Close" onclick="MobileAdInGameEnd.Close();"></a>
                 <div id="MobileAdInGameEnd2-Box-Body">
-                    <center></center>
+                    <center>
+<!-- MobileAdInGameEnd2 -->
+                    </center>
                 </div>
                 <div id='MobileAdInGameEnd2-Box-Footer'></div>
             </div>
         </div>
 
+        <!-- THIRD AD (ROTATION) -->
         <div id="MobileAdInGameEnd3">
             <div id="MobileAdInGameEnd3-Box">
                 <div id="MobileAdInGameEnd3-Box-Header"></div>
                 <a id="MobileAdInGameEnd3-Box-Close" onclick="MobileAdInGameEnd.Close();"></a>
                 <div id="MobileAdInGameEnd3-Box-Body">
-                    <center></center>
+                    <center>
+<!-- MobileAdInGameEnd3 -->
+                    </center>
                 </div>
                 <div id='MobileAdInGameEnd3-Box-Footer'></div>
             </div>
         </div>
-    </div>
 
-    <!-- Additional cleanup script -->
-    <script>
-        setInterval(function() {
-            // Remove any GD elements that might have been added
-            document.querySelectorAll('script[src*="gamedistribution.com"], iframe[src*="gamedistribution.com"]').forEach(el => {
-                console.warn("🧹 Cleaned up GD element");
-                el.remove();
-            });
-            
-            // Check if we're still on the same page
-            if (window.location.href.includes('blocked.html')) {
-                console.error("🚨 Redirect detected! Forcing back...");
-                history.pushState({}, '', window.location.pathname);
-            }
-        }, 500);
-    </script>
+        <!-- END OF SECTION GENERATED BY CODE -->
 
-    <!-- Debug indicator -->
-    <div style="position:fixed; bottom:5px; right:5px; background:rgba(0,0,0,0.7); color:#0f0; padding:4px 8px; font-size:12px; border-radius:4px; z-index:9999; font-family:monospace;">
-        🛡️ GD Killer Active
     </div>
+    <!-- <div id="tempdiv"><br><br><br></div> -->
+<!-- APICode2 -->
+
+
+<!-- END OF TEST -->
+
 </body>
 </html>
