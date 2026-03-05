@@ -15,6 +15,37 @@
 
     <link rel="stylesheet" type="text/css" href="game.css">
     <script type="text/javascript" src="game.js"></script>
+	<script>
+    // Mock GD object to make the game think everything is ready
+    window.gdsdk = {
+        showAd: function() { 
+            console.log("Mock ad shown");
+            return Promise.resolve();
+        },
+        preloadAd: function() { 
+            return Promise.resolve();
+        }
+    };
+
+    // Make sure ig object exists and has gd
+    window.ig = window.ig || {};
+    window.ig.gd = {
+        ready: true,
+        isFreez: 0,
+        adShowing: 0,
+        show: function(callback) { if (callback) callback(); },
+        showRewarded: function(callback) { if (callback) callback(); },
+        unfreez: function() { this.isFreez = 0; },
+        freez: function() { this.isFreez = 1; }
+    };
+
+    // Trigger game start if needed
+    if (typeof window.gameStart === 'function') {
+        window.gameStart();
+    }
+    
+    console.log("✅ Mock GD injected");
+</script>
 	<script type="text/javascript" src="webaudio-context-patch.js"></script>
 
 <!-- AnalyticsCode -->
