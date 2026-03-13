@@ -11,38 +11,41 @@
     <script src="TemplateData/UnityProgress.js"></script>
     <script src="/js/all.js"></script>
     <style>
-        /* Fix zoom issues - maintain aspect ratio */
-        body {
+        /* Fix zoom issues - force exact pixel dimensions */
+        html, body {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
             background: #231F20;
+            overflow: hidden; /* Prevent scrolling */
+        }
+        
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
         }
         
         .webgl-content {
             position: relative;
             width: 960px;
             height: 600px;
-            max-width: 100%;
-            max-height: 100vh;
-            margin: 0 auto;
+            flex-shrink: 0; /* Prevent flex shrinking */
         }
         
         #unityContainer {
-            width: 100% !important;
-            height: 100% !important;
+            width: 960px !important;
+            height: 600px !important;
             position: relative;
             background: rgb(35, 31, 32);
         }
         
         #canvas {
-            width: 100% !important;
-            height: 100% !important;
+            width: 960px !important;
+            height: 600px !important;
             display: block;
-            object-fit: contain; /* This ensures the game scales without cropping/zooming */
+            image-rendering: crisp-edges; /* Keep pixels sharp */
             background: #231F20;
         }
         
@@ -76,7 +79,7 @@
     <div class="webgl-content">
         <button id="audio-button">Enable Audio</button>
         <div id="unityContainer">
-            <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" width=960 height=600 style="width: 100%; height: 100%; background: #231F20"></canvas>
+            <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" width=960 height=600></canvas>
             
             <div id="loadingBox">
                 <div id="bgBar"></div>
@@ -85,6 +88,13 @@
             </div>
             
             <script type='text/javascript'>
+                // Force canvas to maintain exact dimensions
+                var canvas = document.getElementById('canvas');
+                canvas.style.width = '960px';
+                canvas.style.height = '600px';
+                canvas.width = 960;
+                canvas.height = 600;
+
                 // FIX: Add missing console.logError function
                 if (!console.logError) {
                     console.logError = function() {
@@ -116,20 +126,17 @@
                             try {
                                 return originalCssRules.get.call(this);
                             } catch (e) {
-                                console.log('cssRules access denied, returning empty array');
                                 return [];
                             }
                         }
                     });
                 }
 
-                // FIX: Handle insertRule errors
                 var originalInsertRule = CSSStyleSheet.prototype.insertRule;
                 CSSStyleSheet.prototype.insertRule = function(rule, index) {
                     try {
                         return originalInsertRule.call(this, rule, index);
                     } catch (e) {
-                        console.log('insertRule failed, continuing');
                         return 0;
                     }
                 };
@@ -227,7 +234,7 @@
             <script src="Release/fileloader.js"></script>
             
             <script>
-                // FIX: Single script loading approach
+                // Single script loading approach
                 (function() {
                     if (!Math.fround) {
                         var codeXHR = new XMLHttpRequest();
@@ -291,24 +298,18 @@
             </script>
             
             <script>
-                // Final fallbacks
                 window.addEventListener('error', function(e) {
                     if (e.message && e.message.includes('console.logError')) {
                         console.logError = console.error;
                         return true;
                     }
-                    if (e.message && e.message.includes('cssRules')) {
-                        console.log('Ignored CSS error:', e.message);
-                        return true;
-                    }
                 });
 
-                // FIX: Provide mock data for the special events endpoint
+                // Mock data for special events
                 window.fetch = new Proxy(window.fetch, {
                     apply: function(target, thisArg, argumentsList) {
                         var url = argumentsList[0];
                         if (typeof url === 'string' && url.includes('current_events.txt')) {
-                            console.log('Intercepted events request, returning mock data');
                             return Promise.resolve(new Response(
                                 JSON.stringify({
                                     currentEvent: {
