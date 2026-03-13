@@ -2,69 +2,106 @@
 <html lang="en-us">
 <head>
     <base href="https://rawcdn.githack.com/selenite-cc/selenite-old/9c743188888af0986c8c7b293dbac8f9e421a4ee/adventure-capitalist/">
-    <script src="https://tinklehost.github.io/intro.js"></script>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Unity WebGL Player | AdVenture Capitalist!</title>
+    
+    <!-- Font for intro title -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap"/>
+    
     <link rel="stylesheet" href="TemplateData/style.css">
     <script src="TemplateData/UnityProgress.js"></script>
     <script src="/js/all.js"></script>
+    
     <style>
-        /* Responsive design - scales to fit screen */
+        /* === FULLSCREEN PAGE === */
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background: #231F20;
             overflow: hidden;
+            background: #231F20;
         }
-        
-        body {
+
+        /* === INTRO OVERLAY === */
+        body.intro-active { overflow: hidden; }
+
+        #intro-screen {
+            position: fixed;
+            inset: 0;
+            background-color: #414141;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
         }
+
+        #intro-screen.hidden-intro {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #intro-logo-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        #intro-title {
+            font-family: "Orbitron", sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #d3a410, #b7870f, #ffe4a1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(211,165,16,0.4));
+            opacity: 0;
+            animation: titleFade 1s ease forwards 0.4s;
+        }
+
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes titleFade { from { opacity:0; transform:translateY(-12px);} to{opacity:1; transform:translateY(0);} }
+
+        /* SVG animations */
+        @keyframes bounce { 0%,100%{ translate:0px 36px; } 50%{ translate:0px 46px; } }
+        @keyframes bounce2 { 0%,100%{ translate:0px 46px; } 50%{ translate:0px 56px; } }
+        @keyframes umbral { 0%{ stop-color:#d3a5102e; } 50%{ stop-color:rgba(211,165,16,0.519); } 100%{ stop-color:#d3a5102e; } }
+        @keyframes particles { 0%,100%{ translate:0px 16px; } 50%{ translate:0px 6px; } }
+
+        #particles { animation: particles 4s ease-in-out infinite; }
+        #animatedStop { animation: umbral 4s infinite; }
+        #bounce { animation: bounce 4s ease-in-out infinite; translate:0px 36px; }
+        #bounce2 { animation: bounce2 4s ease-in-out infinite; translate:0px 46px; animation-delay:0.5s; }
         
-        .webgl-content {
-            position: relative;
-            width: min(960px, 95vw);
-            height: min(600px, calc(95vw * 0.625)); /* 600/960 = 0.625 aspect ratio */
-            max-width: 960px;
-            max-height: 600px;
+        /* Unity container */
+        .webgl-content, #unityContainer {
+            position: absolute;
+            width: 100% !important;
+            height: 100% !important;
+            top: 0;
+            left: 0;
         }
         
         #unityContainer {
             width: 100% !important;
             height: 100% !important;
-            position: relative;
-            background: rgb(35, 31, 32);
+            padding: 0px !important;
+            margin: 0px !important;
+            border: 0px !important;
+            position: absolute !important;
+            background: rgb(35, 31, 32) !important;
         }
         
         #canvas {
             width: 100% !important;
             height: 100% !important;
-            display: block;
-            background: #231F20;
-        }
-        
-        #audio-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            padding: 10px 20px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: clamp(12px, 2vw, 16px);
-        }
-        #audio-button:hover {
-            background: #45a049;
+            background: #231F20 !important;
         }
         
         #loadingBox {
@@ -72,309 +109,207 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: min(300px, 80%);
-            z-index: 10;
-        }
-        
-        #loadingInfo {
-            color: white;
-            text-align: center;
-            font-size: clamp(12px, 2vw, 14px);
+            z-index: 1000;
         }
     </style>
 </head>
-<body class="template">
+ 
+<body class="template intro-active">
+    <!-- INTRO SCREEN - EXACT SAME AS ORIGINAL -->
+    <div id="intro-screen">
+        <div id="intro-logo-wrapper">
+            <div id="intro-title">Tinkle Games</div>
+
+            <!-- EXACT SAME SVG LOGO FROM ORIGINAL -->
+            <svg xmlns="http://www.w3.org/2000/svg" height="200" width="200">
+                <g style="order:-1;">
+                    <polygon transform="rotate(45 100 100)" stroke-width="1" stroke="#d3a410" fill="none" points="70,70 148,50 130,130 50,150" id="bounce"></polygon>
+                    <polygon transform="rotate(45 100 100)" stroke-width="1" stroke="#d3a410" fill="none" points="70,70 148,50 130,130 50,150" id="bounce2"></polygon>
+                    <polygon transform="rotate(45 100 100)" stroke-width="2" fill="#414750" points="70,70 150,50 130,130 50,150"></polygon>
+                    <polygon stroke-width="2" fill="url(#gradiente)" points="100,70 150,100 100,130 50,100"></polygon>
+                    <defs>
+                        <linearGradient y2="100%" x2="10%" y1="0%" x1="0%" id="gradiente">
+                            <stop style="stop-color:#1e2026;stop-opacity:1" offset="20%"></stop>
+                            <stop style="stop-color:#414750;stop-opacity:1" offset="60%"></stop>
+                        </linearGradient>
+                        <linearGradient y2="100%" x2="0%" y1="-17%" x1="10%" id="gradiente2">
+                            <stop style="stop-color:#d3a51000;stop-opacity:1" offset="20%"></stop>
+                            <stop style="stop-color:#d3a51054;stop-opacity:1" offset="100%" id="animatedStop"></stop>
+                        </linearGradient>
+                        <linearGradient y2="100%" x2="10%" y1="0%" x1="0%" id="gradiente3">
+                            <stop style="stop-color:#d3a51000;stop-opacity:1" offset="20%"></stop>
+                            <stop style="stop-color:#d3a51054;stop-opacity:1" offset="100%"></stop>
+                        </linearGradient>
+                    </defs>
+                    <polygon transform="translate(20,31)" stroke-width="2" fill="#b7870f" points="80,50 80,75 80,99 40,75"></polygon>
+                    <polygon transform="translate(20,31)" stroke-width="2" fill="url(#gradiente2)" points="40,-40 80,-40 80,99 40,75"></polygon>
+                    <polygon transform="rotate(180 100 100) translate(20,20)" stroke-width="2" fill="#d3a410" points="80,50 80,75 80,99 40,75"></polygon>
+                    <polygon transform="rotate(0 100 100) translate(60,20)" stroke-width="2" fill="url(#gradiente3)" points="40,-40 80,-40 80,85 40,110.2"></polygon>
+                    <polygon transform="rotate(45 100 100) translate(80,95)" stroke-width="2" fill="#ffe4a1" points="5,0 5,5 0,5 0,0" id="particles"></polygon>
+                    <polygon transform="rotate(45 100 100) translate(80,55)" stroke-width="2" fill="#ccb069" points="6,0 6,6 0,6 0,0" id="particles"></polygon>
+                    <polygon transform="rotate(45 100 100) translate(70,80)" stroke-width="2" fill="#fff" points="2,0 2,2 0,2 0,0" id="particles"></polygon>
+                    <polygon stroke-width="2" fill="#292d34" points="29.5,99.8 100,142 100,172 29.5,130"></polygon>
+                    <polygon transform="translate(50,92)" stroke-width="2" fill="#1f2127" points="50,50 120.5,8 120.5,35 50,80"></polygon>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- GAME CONTAINER -->
     <div class="webgl-content">
-        <button id="audio-button">Enable Audio</button>
         <div id="unityContainer">
-            <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" width=960 height=600></canvas>
+            <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" width="335" height="667"></canvas>
             
             <div id="loadingBox">
                 <div id="bgBar"></div>
                 <div id="progressBar"></div>
                 <p id="loadingInfo">Loading...</p>
             </div>
-            
-            <script type='text/javascript'>
-                // CRITICAL FIX: Override dlopen at the highest level
-                if (typeof window._dlopen === 'undefined') {
-                    window._dlopen = function() { 
-                        console.log('Global _dlopen stub called');
-                        return 1; // Return non-zero for success
-                    };
-                }
-                
-                // Override the specific function that's failing
-                window.dlopen = window._dlopen;
-                
-                // Add missing console.logError function
-                if (!console.logError) {
-                    console.logError = function() {
-                        console.error.apply(console, arguments);
-                    };
-                }
-
-                // FIX: Override XMLHttpRequest to upgrade HTTP to HTTPS
-                var originalOpen = XMLHttpRequest.prototype.open;
-                XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-                    if (typeof url === 'string' && url.startsWith('http://')) {
-                        var httpsDomains = ['cdn.hyperhippo.ca', 'hyperhippo.ca'];
-                        for (var i = 0; i < httpsDomains.length; i++) {
-                            if (url.includes(httpsDomains[i])) {
-                                url = url.replace('http://', 'https://');
-                                console.log('Upgraded to HTTPS:', url);
-                                break;
-                            }
-                        }
-                    }
-                    return originalOpen.call(this, method, url, async, user, password);
-                };
-
-                // Handle CSSStyleSheet access errors
-                var originalCssRules = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'cssRules');
-                if (originalCssRules) {
-                    Object.defineProperty(CSSStyleSheet.prototype, 'cssRules', {
-                        get: function() {
-                            try {
-                                return originalCssRules.get.call(this);
-                            } catch (e) {
-                                return [];
-                            }
-                        }
-                    });
-                }
-
-                var originalInsertRule = CSSStyleSheet.prototype.insertRule;
-                CSSStyleSheet.prototype.insertRule = function(rule, index) {
-                    try {
-                        return originalInsertRule.call(this, rule, index);
-                    } catch (e) {
-                        return 0;
-                    }
-                };
-
-                // Audio context handling
-                window.audioContext = null;
-                window.resumeAudio = function() {
-                    if (window.audioContext && window.audioContext.state === 'suspended') {
-                        window.audioContext.resume();
-                    }
-                    if (window.Module && window.Module.audioContext) {
-                        window.Module.audioContext.resume();
-                    }
-                };
-
-                document.addEventListener('DOMContentLoaded', function() {
-                    document.getElementById('audio-button').addEventListener('click', function() {
-                        window.resumeAudio();
-                        this.style.display = 'none';
-                    });
-                });
-
-                // Store audio context when created
-                var originalAudioContext = window.AudioContext || window.webkitAudioContext;
-                if (originalAudioContext) {
-                    window.AudioContext = function() {
-                        var ctx = new originalAudioContext();
-                        window.audioContext = ctx;
-                        return ctx;
-                    };
-                    window.webkitAudioContext = window.AudioContext;
-                }
-
-                // Define Module with comprehensive stubs
-                window.Module = {
-                    TOTAL_MEMORY: 201326592,
-                    filePackagePrefixURL: "Release/",
-                    memoryInitializerPrefixURL: "Release/",
-                    preRun: [],
-                    postRun: [],
-                    print: function(text) {
-                        console.log(text);
-                    },
-                    printErr: function(text) {
-                        console.error(text);
-                    },
-                    canvas: document.getElementById('canvas'),
-                    progress: null,
-                    setStatus: function(text) {
-                        if (this.progress == null) {
-                            if (typeof UnityProgress != 'function')
-                                return;
-                            this.progress = new UnityProgress(this.canvas);
-                        }
-                        if (!this.setStatus.last) this.setStatus.last = {
-                            time: Date.now(),
-                            text: ''
-                        };
-                        if (text === this.setStatus.text) return;
-                        this.progress.SetMessage(text);
-                        var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-                        if (m)
-                            this.progress.SetProgress(parseInt(m[2]) / parseInt(m[4]));
-                        if (text === "")
-                            this.progress.Clear()
-                    },
-                    totalDependencies: 0,
-                    monitorRunDependencies: function(left) {
-                        this.totalDependencies = Math.max(this.totalDependencies, left);
-                        this.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
-                    },
-                    
-                    audioContext: null,
-                    
-                    // CRITICAL: Override _dlopen to return success
-                    _dlopen: function() { 
-                        console.log('Module._dlopen stub called - returning success');
-                        return 1; // Return non-zero for success
-                    },
-                    _dlsym: function() { 
-                        console.log('Module._dlsym stub called');
-                        return 0; 
-                    },
-                    _dlclose: function() { 
-                        console.log('Module._dlclose stub called');
-                        return 0; 
-                    },
-                    _JS_Cursor_SetCursorString: function() { return 0; },
-                    _JS_Cursor_SetShow: function() { return 0; },
-                    _JS_WebRequest_Send: function() { return 0; },
-                    
-                    // Add any other missing functions
-                    _JS_Sound_Play: function() { return 0; },
-                    _JS_Sound_Stop: function() { return 0; },
-                    _JS_Sound_SetVolume: function() { return 0; }
-                };
-                
-                // Extend Module with asmLibraryArg
-                window.Module.asmLibraryArg = window.Module.asmLibraryArg || {};
-                var stubs = ['_dlopen', '_dlsym', '_dlclose', '_JS_Cursor_SetCursorString', 
-                            '_JS_Cursor_SetShow', '_JS_WebRequest_Send', '_JS_Sound_Play',
-                            '_JS_Sound_Stop', '_JS_Sound_SetVolume'];
-                stubs.forEach(function(stub) {
-                    window.Module.asmLibraryArg[stub] = window.Module[stub];
-                });
-
-                window.Module.setStatus('Downloading...');
-            </script>
-            
-            <script src="Release/UnityConfig.js"></script>
-            <script src="Release/fileloader.js"></script>
-            
-            <script>
-                // Load webgl.js with interceptors
-                (function() {
-                    // Override fetch for special events
-                    window.fetch = new Proxy(window.fetch, {
-                        apply: function(target, thisArg, argumentsList) {
-                            var url = argumentsList[0];
-                            if (typeof url === 'string' && url.includes('current_events.txt')) {
-                                console.log('Returning mock event data');
-                                return Promise.resolve(new Response(
-                                    JSON.stringify({
-                                        currentEvent: {
-                                            name: "Standard Event",
-                                            multiplier: 1,
-                                            startDate: new Date().toISOString(),
-                                            endDate: new Date(Date.now() + 7*86400000).toISOString()
-                                        }
-                                    }),
-                                    {
-                                        status: 200,
-                                        headers: { 'Content-Type': 'application/json' }
-                                    }
-                                ));
-                            }
-                            return target.apply(thisArg, argumentsList);
-                        }
-                    });
-
-                    // Load webgl.js
-                    if (!Math.fround) {
-                        var codeXHR = new XMLHttpRequest();
-                        codeXHR.open('GET', 'Release/webgl.js', true);
-                        codeXHR.onload = function() {
-                            var code = codeXHR.responseText;
-                            
-                            // Inject dlopen stub directly into the code
-                            code = code.replace(
-                                'var Module = typeof Module !== ',
-                                '// Injected dlopen stub\n' +
-                                'window._dlopen = window._dlopen || function() { return 1; };\n' +
-                                'var Module = typeof Module !== '
-                            );
-                            
-                            try {
-                                if (!Math.fround) {
-                                    var m = /var ([^=]+)=global\.Math\.fround;/.exec(code);
-                                    var minified = m[1];
-                                    if (minified) {
-                                        var startAsm = code.indexOf('// EMSCRIPTEN_START_FUNCS');
-                                        var endAsm = code.indexOf('// EMSCRIPTEN_END_FUNCS');
-                                        var asm = code.substring(startAsm, endAsm);
-                                        do {
-                                            var moar = false;
-                                            asm = asm.replace(new RegExp('[^a-zA-Z0-9\\$\\_]' + minified + '\\(', 'g'), function(s) {
-                                                moar = true;
-                                                return s[0] + '('
-                                            });
-                                        } while (moar);
-                                        code = code.substring(0, startAsm) + asm + code.substring(endAsm);
-                                        code = code.replace("'use asm'", "'almost asm'");
-                                    }
-                                }
-                            } catch (e) {
-                                console.log('Optimization failed: ' + e);
-                            }
-                            
-                            var blob = new Blob([code], { type: 'text/javascript' });
-                            var script = document.createElement('script');
-                            script.src = URL.createObjectURL(blob);
-                            script.onload = function() {
-                                URL.revokeObjectURL(script.src);
-                                console.log('webgl.js loaded with dlopen stub');
-                                
-                                // Resume audio on click
-                                document.body.addEventListener('click', function() {
-                                    if (window.Module && window.Module.audioContext) {
-                                        window.Module.audioContext.resume();
-                                    }
-                                }, { once: true });
-                            };
-                            document.body.appendChild(script);
-                        };
-                        codeXHR.send(null);
-                    } else {
-                        var script = document.createElement('script');
-                        script.src = "Release/webgl.js";
-                        script.onload = function() {
-                            console.log('webgl.js loaded');
-                            document.body.addEventListener('click', function() {
-                                if (window.Module && window.Module.audioContext) {
-                                    window.Module.audioContext.resume();
-                                }
-                            }, { once: true });
-                        };
-                        document.body.appendChild(script);
-                    }
-                })();
-            </script>
-            
-            <script>
-                // Final error handler
-                window.addEventListener('error', function(e) {
-                    if (e.message && e.message.includes('dlopen')) {
-                        console.log('Caught dlopen error, providing fallback');
-                        window._dlopen = function() { return 1; };
-                        return true;
-                    }
-                    if (e.message && e.message.includes('console.logError')) {
-                        console.logError = console.error;
-                        return true;
-                    }
-                });
-            </script>
         </div>
     </div>
+    
+    <script type='text/javascript'>
+        // === INTRO FADE-OUT ===
+        function hideIntro() {
+            const intro = document.getElementById("intro-screen");
+            if (intro) {
+                intro.classList.add("hidden-intro");
+                document.body.classList.remove("intro-active");
+                setTimeout(() => intro.remove(), 800);
+            }
+        }
+
+        // Show intro for ~2 seconds
+        setTimeout(hideIntro, 2000);
+        
+        // Resize canvas to fullscreen
+        function resizeCanvas() {
+            const canvas = document.getElementById('canvas');
+            const container = document.getElementById('unityContainer');
+            
+            if (canvas && container) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                canvas.style.width = window.innerWidth + "px";
+                canvas.style.height = window.innerHeight + "px";
+                
+                container.style.width = window.innerWidth + "px";
+                container.style.height = window.innerHeight + "px";
+            }
+        }
+        
+        // Apply resizing when page loads
+        window.addEventListener('load', function() {
+            resizeCanvas();
+            setTimeout(resizeCanvas, 50); // Extra delay for Unity
+        });
+        
+        window.addEventListener('resize', function() {
+            setTimeout(resizeCanvas, 50);
+        });
+
+        // Your existing Unity setup code
+        var Module = {
+            TOTAL_MEMORY: 201326592,
+            filePackagePrefixURL: "Release/",
+            memoryInitializerPrefixURL: "Release/",
+            preRun: [],
+            postRun: [],
+            print: (function() {
+                return function(text) {
+                    console.log(text);
+                };
+            })(),
+            printErr: function(text) {
+                console.error(text);
+            },
+            canvas: document.getElementById('canvas'),
+            progress: null,
+            setStatus: function(text) {
+                if (this.progress == null) {
+                    if (typeof UnityProgress != 'function')
+                        return;
+                    this.progress = new UnityProgress(canvas);
+                }
+                if (!Module.setStatus.last) Module.setStatus.last = {
+                    time: Date.now(),
+                    text: ''
+                };
+                if (text === Module.setStatus.text) return;
+                this.progress.SetMessage(text);
+                var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                if (m)
+                    this.progress.SetProgress(parseInt(m[2]) / parseInt(m[4]));
+                if (text === "")
+                    this.progress.Clear()
+            },
+            totalDependencies: 0,
+            monitorRunDependencies: function(left) {
+                this.totalDependencies = Math.max(this.totalDependencies, left);
+                Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+            }
+        };
+        Module.setStatus('Downloading (0.0/1)');
+    </script>
+    
+    <script src="Release/UnityConfig.js"></script>
+    <script src="Release/fileloader.js"></script>
+    
+    <script>
+        if (!console.logError) {
+            console.logError = function () {
+                console.error.apply(console, arguments);
+            };
+        }
+    </script>
+    
+    <script>
+        // Your existing webgl.js loading logic
+        if (!(!Math.fround)) {
+            var script = document.createElement('script');
+            script.src = "Release/webgl.js";
+            document.body.appendChild(script);
+        } else {
+            var codeXHR = new XMLHttpRequest();
+            codeXHR.open('GET', 'Release/webgl.js', true);
+            codeXHR.onload = function() {
+                var code = codeXHR.responseText;
+                if (!Math.fround) {
+                    try {
+                        console.log('optimizing out Math.fround calls');
+                        var m = /var ([^=]+)=global\.Math\.fround;/.exec(code);
+                        var minified = m[1];
+                        if (!minified) throw 'fail';
+                        var startAsm = code.indexOf('// EMSCRIPTEN_START_FUNCS');
+                        var endAsm = code.indexOf('// EMSCRIPTEN_END_FUNCS');
+                        var asm = code.substring(startAsm, endAsm);
+                        do {
+                            var moar = false;
+                            asm = asm.replace(new RegExp('[^a-zA-Z0-9\\$\\_]' + minified + '\\(', 'g'), function(s) {
+                                moar = true;
+                                return s[0] + '('
+                            });
+                        } while (moar);
+                        code = code.substring(0, startAsm) + asm + code.substring(endAsm);
+                        code = code.replace("'use asm'", "'almost asm'");
+                    } catch (e) {
+                        console.log('failed to optimize out Math.fround calls ' + e)
+                    }
+                }
+                var blob = new Blob([code], {
+                    type: 'text/javascript'
+                });
+                codeXHR = null;
+                var src = URL.createObjectURL(blob);
+                var script = document.createElement('script');
+                script.src = URL.createObjectURL(blob);
+                script.onload = function() {
+                    URL.revokeObjectURL(script.src);
+                };
+                document.body.appendChild(script);
+            };
+            codeXHR.send(null);
+        }
+    </script>
 </body>
 </html>
