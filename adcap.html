@@ -6,19 +6,20 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
     <title>Unity WebGL Player | AdVenture Capitalist!</title>
     <link rel="stylesheet" href="TemplateData/style.css">
     <script src="TemplateData/UnityProgress.js"></script>
     <script src="/js/all.js"></script>
     <style>
-        /* Fix zoom issues - force exact pixel dimensions */
+        /* Responsive design - scales to fit screen */
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             background: #231F20;
-            overflow: hidden; /* Prevent scrolling */
+            overflow: hidden;
         }
         
         body {
@@ -29,23 +30,23 @@
         
         .webgl-content {
             position: relative;
-            width: 960px;
-            height: 600px;
-            flex-shrink: 0; /* Prevent flex shrinking */
+            width: min(960px, 95vw);
+            height: min(600px, calc(95vw * 0.625)); /* 600/960 = 0.625 aspect ratio */
+            max-width: 960px;
+            max-height: 600px;
         }
         
         #unityContainer {
-            width: 960px !important;
-            height: 600px !important;
+            width: 100% !important;
+            height: 100% !important;
             position: relative;
             background: rgb(35, 31, 32);
         }
         
         #canvas {
-            width: 960px !important;
-            height: 600px !important;
+            width: 100% !important;
+            height: 100% !important;
             display: block;
-            image-rendering: crisp-edges; /* Keep pixels sharp */
             background: #231F20;
         }
         
@@ -60,6 +61,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: clamp(12px, 2vw, 16px);
         }
         #audio-button:hover {
             background: #45a049;
@@ -70,8 +72,14 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 300px;
+            width: min(300px, 80%);
             z-index: 10;
+        }
+        
+        #loadingInfo {
+            color: white;
+            text-align: center;
+            font-size: clamp(12px, 2vw, 14px);
         }
     </style>
 </head>
@@ -88,21 +96,25 @@
             </div>
             
             <script type='text/javascript'>
-                // Force canvas to maintain exact dimensions
-                var canvas = document.getElementById('canvas');
-                canvas.style.width = '960px';
-                canvas.style.height = '600px';
-                canvas.width = 960;
-                canvas.height = 600;
-
-                // FIX: Add missing console.logError function
+                // CRITICAL FIX: Override dlopen at the highest level
+                if (typeof window._dlopen === 'undefined') {
+                    window._dlopen = function() { 
+                        console.log('Global _dlopen stub called');
+                        return 1; // Return non-zero for success
+                    };
+                }
+                
+                // Override the specific function that's failing
+                window.dlopen = window._dlopen;
+                
+                // Add missing console.logError function
                 if (!console.logError) {
                     console.logError = function() {
                         console.error.apply(console, arguments);
                     };
                 }
 
-                // FIX: Override XMLHttpRequest to upgrade HTTP to HTTPS for specific domains
+                // FIX: Override XMLHttpRequest to upgrade HTTP to HTTPS
                 var originalOpen = XMLHttpRequest.prototype.open;
                 XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
                     if (typeof url === 'string' && url.startsWith('http://')) {
@@ -118,7 +130,7 @@
                     return originalOpen.call(this, method, url, async, user, password);
                 };
 
-                // FIX: Handle CSSStyleSheet access errors
+                // Handle CSSStyleSheet access errors
                 var originalCssRules = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'cssRules');
                 if (originalCssRules) {
                     Object.defineProperty(CSSStyleSheet.prototype, 'cssRules', {
@@ -170,7 +182,7 @@
                     window.webkitAudioContext = window.AudioContext;
                 }
 
-                // Define Module with proper canvas size
+                // Define Module with comprehensive stubs
                 window.Module = {
                     TOTAL_MEMORY: 201326592,
                     filePackagePrefixURL: "Release/",
@@ -211,18 +223,34 @@
                     
                     audioContext: null,
                     
-                    // Add stubs for missing functions
-                    _dlopen: function() { return 0; },
-                    _dlsym: function() { return 0; },
-                    _dlclose: function() { return 0; },
+                    // CRITICAL: Override _dlopen to return success
+                    _dlopen: function() { 
+                        console.log('Module._dlopen stub called - returning success');
+                        return 1; // Return non-zero for success
+                    },
+                    _dlsym: function() { 
+                        console.log('Module._dlsym stub called');
+                        return 0; 
+                    },
+                    _dlclose: function() { 
+                        console.log('Module._dlclose stub called');
+                        return 0; 
+                    },
                     _JS_Cursor_SetCursorString: function() { return 0; },
                     _JS_Cursor_SetShow: function() { return 0; },
-                    _JS_WebRequest_Send: function() { return 0; }
+                    _JS_WebRequest_Send: function() { return 0; },
+                    
+                    // Add any other missing functions
+                    _JS_Sound_Play: function() { return 0; },
+                    _JS_Sound_Stop: function() { return 0; },
+                    _JS_Sound_SetVolume: function() { return 0; }
                 };
                 
                 // Extend Module with asmLibraryArg
                 window.Module.asmLibraryArg = window.Module.asmLibraryArg || {};
-                var stubs = ['_dlopen', '_dlsym', '_dlclose', '_JS_Cursor_SetCursorString', '_JS_Cursor_SetShow', '_JS_WebRequest_Send'];
+                var stubs = ['_dlopen', '_dlsym', '_dlclose', '_JS_Cursor_SetCursorString', 
+                            '_JS_Cursor_SetShow', '_JS_WebRequest_Send', '_JS_Sound_Play',
+                            '_JS_Sound_Stop', '_JS_Sound_SetVolume'];
                 stubs.forEach(function(stub) {
                     window.Module.asmLibraryArg[stub] = window.Module[stub];
                 });
@@ -234,34 +262,69 @@
             <script src="Release/fileloader.js"></script>
             
             <script>
-                // Single script loading approach
+                // Load webgl.js with interceptors
                 (function() {
+                    // Override fetch for special events
+                    window.fetch = new Proxy(window.fetch, {
+                        apply: function(target, thisArg, argumentsList) {
+                            var url = argumentsList[0];
+                            if (typeof url === 'string' && url.includes('current_events.txt')) {
+                                console.log('Returning mock event data');
+                                return Promise.resolve(new Response(
+                                    JSON.stringify({
+                                        currentEvent: {
+                                            name: "Standard Event",
+                                            multiplier: 1,
+                                            startDate: new Date().toISOString(),
+                                            endDate: new Date(Date.now() + 7*86400000).toISOString()
+                                        }
+                                    }),
+                                    {
+                                        status: 200,
+                                        headers: { 'Content-Type': 'application/json' }
+                                    }
+                                ));
+                            }
+                            return target.apply(thisArg, argumentsList);
+                        }
+                    });
+
+                    // Load webgl.js
                     if (!Math.fround) {
                         var codeXHR = new XMLHttpRequest();
                         codeXHR.open('GET', 'Release/webgl.js', true);
                         codeXHR.onload = function() {
                             var code = codeXHR.responseText;
                             
+                            // Inject dlopen stub directly into the code
+                            code = code.replace(
+                                'var Module = typeof Module !== ',
+                                '// Injected dlopen stub\n' +
+                                'window._dlopen = window._dlopen || function() { return 1; };\n' +
+                                'var Module = typeof Module !== '
+                            );
+                            
                             try {
-                                console.log('optimizing out Math.fround calls');
-                                var m = /var ([^=]+)=global\.Math\.fround;/.exec(code);
-                                var minified = m[1];
-                                if (minified) {
-                                    var startAsm = code.indexOf('// EMSCRIPTEN_START_FUNCS');
-                                    var endAsm = code.indexOf('// EMSCRIPTEN_END_FUNCS');
-                                    var asm = code.substring(startAsm, endAsm);
-                                    do {
-                                        var moar = false;
-                                        asm = asm.replace(new RegExp('[^a-zA-Z0-9\\$\\_]' + minified + '\\(', 'g'), function(s) {
-                                            moar = true;
-                                            return s[0] + '('
-                                        });
-                                    } while (moar);
-                                    code = code.substring(0, startAsm) + asm + code.substring(endAsm);
-                                    code = code.replace("'use asm'", "'almost asm'");
+                                if (!Math.fround) {
+                                    var m = /var ([^=]+)=global\.Math\.fround;/.exec(code);
+                                    var minified = m[1];
+                                    if (minified) {
+                                        var startAsm = code.indexOf('// EMSCRIPTEN_START_FUNCS');
+                                        var endAsm = code.indexOf('// EMSCRIPTEN_END_FUNCS');
+                                        var asm = code.substring(startAsm, endAsm);
+                                        do {
+                                            var moar = false;
+                                            asm = asm.replace(new RegExp('[^a-zA-Z0-9\\$\\_]' + minified + '\\(', 'g'), function(s) {
+                                                moar = true;
+                                                return s[0] + '('
+                                            });
+                                        } while (moar);
+                                        code = code.substring(0, startAsm) + asm + code.substring(endAsm);
+                                        code = code.replace("'use asm'", "'almost asm'");
+                                    }
                                 }
                             } catch (e) {
-                                console.log('failed to optimize out Math.fround calls: ' + e);
+                                console.log('Optimization failed: ' + e);
                             }
                             
                             var blob = new Blob([code], { type: 'text/javascript' });
@@ -269,8 +332,9 @@
                             script.src = URL.createObjectURL(blob);
                             script.onload = function() {
                                 URL.revokeObjectURL(script.src);
-                                console.log('webgl.js loaded');
+                                console.log('webgl.js loaded with dlopen stub');
                                 
+                                // Resume audio on click
                                 document.body.addEventListener('click', function() {
                                     if (window.Module && window.Module.audioContext) {
                                         window.Module.audioContext.resume();
@@ -285,7 +349,6 @@
                         script.src = "Release/webgl.js";
                         script.onload = function() {
                             console.log('webgl.js loaded');
-                            
                             document.body.addEventListener('click', function() {
                                 if (window.Module && window.Module.audioContext) {
                                     window.Module.audioContext.resume();
@@ -298,34 +361,16 @@
             </script>
             
             <script>
+                // Final error handler
                 window.addEventListener('error', function(e) {
+                    if (e.message && e.message.includes('dlopen')) {
+                        console.log('Caught dlopen error, providing fallback');
+                        window._dlopen = function() { return 1; };
+                        return true;
+                    }
                     if (e.message && e.message.includes('console.logError')) {
                         console.logError = console.error;
                         return true;
-                    }
-                });
-
-                // Mock data for special events
-                window.fetch = new Proxy(window.fetch, {
-                    apply: function(target, thisArg, argumentsList) {
-                        var url = argumentsList[0];
-                        if (typeof url === 'string' && url.includes('current_events.txt')) {
-                            return Promise.resolve(new Response(
-                                JSON.stringify({
-                                    currentEvent: {
-                                        name: "Standard Event",
-                                        multiplier: 1,
-                                        startDate: new Date().toISOString(),
-                                        endDate: new Date(Date.now() + 7*86400000).toISOString()
-                                    }
-                                }),
-                                {
-                                    status: 200,
-                                    headers: { 'Content-Type': 'application/json' }
-                                }
-                            ));
-                        }
-                        return target.apply(thisArg, argumentsList);
                     }
                 });
             </script>
