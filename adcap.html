@@ -43,6 +43,14 @@
             </div>
             
             <script type='text/javascript'>
+                // FIX: Add missing console.logError function
+                if (!console.logError) {
+                    console.logError = function() {
+                        // Forward to console.error
+                        console.error.apply(console, arguments);
+                    };
+                }
+
                 // FIX: Create stubs for dlopen functionality BEFORE Module is defined
                 if (typeof window.dlopen === 'undefined') {
                     window.dlopen = function() { 
@@ -95,6 +103,9 @@
                     window.webkitAudioContext = window.AudioContext;
                 }
 
+                // FIX: Override WebGL getExtension to handle missing extensions gracefully
+                var originalGetExtension = HTMLCanvasElement.prototype.getExtension || WebGLRenderingContext.prototype.getExtension;
+                
                 // Connect to canvas - define Module ONCE
                 window.Module = {
                     TOTAL_MEMORY: 201326592,
@@ -149,6 +160,16 @@
                     _dlclose: function() {
                         console.log('dlclose called - returning stub success');
                         return 0;
+                    },
+                    
+                    // FIX: Add JS function stubs
+                    _JS_Cursor_SetCursorString: function() {
+                        console.log('_JS_Cursor_SetCursorString stub called');
+                        return 0;
+                    },
+                    _JS_Cursor_SetShow: function() {
+                        console.log('_JS_Cursor_SetShow stub called');
+                        return 0;
                     }
                 };
                 
@@ -157,6 +178,8 @@
                 window.Module.asmLibraryArg._dlopen = window.Module._dlopen;
                 window.Module.asmLibraryArg._dlsym = window.Module._dlsym;
                 window.Module.asmLibraryArg._dlclose = window.Module._dlclose;
+                window.Module.asmLibraryArg._JS_Cursor_SetCursorString = window.Module._JS_Cursor_SetCursorString;
+                window.Module.asmLibraryArg._JS_Cursor_SetShow = window.Module._JS_Cursor_SetShow;
 
                 window.Module.setStatus('Downloading...');
             </script>
@@ -232,6 +255,17 @@
                         document.body.appendChild(script);
                     }
                 })();
+            </script>
+            
+            <script>
+                // FIX: Final fallback - if the game still tries to call console.logError
+                window.addEventListener('error', function(e) {
+                    if (e.message && e.message.includes('console.logError')) {
+                        console.log('Caught console.logError error, providing fallback');
+                        console.logError = console.error;
+                        return true; // Prevent default error handling
+                    }
+                });
             </script>
         </div>
     </div>
